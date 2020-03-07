@@ -183,7 +183,7 @@ namespace Fastnet.Apollo.Agents
                     {
                         var fp = new DirectoryInfo(Path.Combine(path, ap));
                         RemoveInvalidFolders(new DirectoryInfo[] { fp });
-                        log.Information($"{fp} deleted");
+                        //log.Information($"{fp} deleted");
                     }
                 }
             }
@@ -203,7 +203,7 @@ namespace Fastnet.Apollo.Agents
                 {
                     if (artistDirectory.LastWriteTimeUtc <= artist.LastModified.UtcDateTime)
                     {
-                        artistDirectory.Clear(log);
+                        artistDirectory.Clear();
                         //ClearContents(artistDirectory);
                     }
 
@@ -213,19 +213,7 @@ namespace Fastnet.Apollo.Agents
             }
             return;
         }
-        //private void ClearContents(DirectoryInfo dir)
-        //{
-        //    foreach (var file in dir.EnumerateFiles())
-        //    {
-        //        file.Delete();
-        //    }
-        //    foreach (var d in dir.EnumerateDirectories())
-        //    {
-        //        ClearContents(d);
-        //        d.Delete();
-        //    }
 
-        //}
         private DirectoryInfo GetArtistDirectory(Artist artist)
         {
             try
