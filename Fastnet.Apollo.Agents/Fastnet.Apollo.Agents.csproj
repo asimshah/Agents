@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp3.1</TargetFramework>
-    <Version>1.1.1</Version>
+    <Version>2.1.0</Version>
     <Authors>Asim Shah</Authors>
     <Product>F astnet Agents</Product>
   </PropertyGroup>
