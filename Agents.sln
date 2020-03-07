@@ -1,0 +1,30 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29424.173
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Fastnet.Apollo.Agents", "Fastnet.Apollo.Agents\Fastnet.Apollo.Agents.csproj", "{B37D8929-BF34-4275-8BB7-6E38263DAADF}"
+EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "SharedWeb", "..\SharedWeb\SharedWeb.shproj", "{080852F5-8880-42CD-8A4C-03C8F0B69E2B}"
+EndProject
+Global
+	GlobalSection(SharedMSBuildProjectFiles) = preSolution
+		..\SharedWeb\SharedWeb.projitems*{080852f5-8880-42cd-8a4c-03c8f0b69e2b}*SharedItemsImports = 13
+	EndGlobalSection
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{B37D8929-BF34-4275-8BB7-6E38263DAADF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B37D8929-BF34-4275-8BB7-6E38263DAADF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B37D8929-BF34-4275-8BB7-6E38263DAADF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B37D8929-BF34-4275-8BB7-6E38263DAADF}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {083768EB-75E6-4686-8C9D-B34A6DA4C166}
+	EndGlobalSection
+EndGlobal
