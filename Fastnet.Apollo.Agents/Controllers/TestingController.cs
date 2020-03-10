@@ -10,18 +10,24 @@ using NAudio.Wave;
 
 namespace Fastnet.Apollo.Agents
 {
-    [Route("port")] 
-    public class PortingController : BaseController
+    [Route("test")] 
+    public class TestingController : BaseController
     {
         private readonly SchedulerService schedulerService;
-        public PortingController(SchedulerService schedulerService, IWebHostEnvironment env, ILogger<PortingController> logger): base(logger, env)
+        public TestingController(SchedulerService schedulerService, IWebHostEnvironment env, ILogger<TestingController> logger): base(logger, env)
         {
             this.schedulerService = schedulerService;
         }
-        [HttpGet("start")]
+        [HttpGet("port/start")]
         public async Task<IActionResult> StartMusicPort()
         {
             await schedulerService.ExecuteNow<MusicPortingTask>();
+            return SuccessResult();
+        }
+        [HttpGet("backup/start")]
+        public async Task<IActionResult> StartBackup()
+        {
+            await schedulerService.ExecuteNow<BackupTask>();
             return SuccessResult();
         }
         //[HttpGet("naudio")]

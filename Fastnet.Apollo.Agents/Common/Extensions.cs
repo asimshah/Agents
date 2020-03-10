@@ -23,24 +23,19 @@ namespace Fastnet.Apollo.Agents
                 {
                     switch (agent.Name)
                     {
-                        //case AgentName.MusicResampler:
-                        //    EnsureResamplingConfiguration(services, configuration);
-                        //    EnsureMusicDb(services, configuration);
-                        //    services.AddSingleton<ScheduledTask, Resampler>();
-                        //    break;
                         case AgentName.PortableMusicLibrary:
-                            //EnsureResamplingConfiguration(services, configuration);
                             services.Configure<PortabilityConfiguration>(configuration.GetSection("PortabilityConfiguration"));
-                            //EnsureMusicDb(services, configuration);
                             services.AddSingleton<ScheduledTask, MusicPortingTask>();
                             break;
                         case AgentName.MusicPlayer:
                             services.Configure<MusicPlayerOptions>(configuration.GetSection("MusicPlayerOptions"));
                             services.AddService<MusicPlayer>();
                             break;
-                        case AgentName.MusicLibraryCopier:
-                            //services.Configure<MusicLibraryCopyConfiguration>(configuration.GetSection("MusicLibraryCopyConfiguration"));
-                            //services.AddSingleton<ScheduledTask, MusicLibraryCopier>();
+                        //case AgentName.MusicLibraryCopier:
+                        //    break;
+                        case AgentName.FolderBackup:
+                            services.Configure<BackupConfiguration>(configuration.GetSection("BackupConfiguration"));
+                            services.AddSingleton<ScheduledTask, BackupTask>();
                             break;
                         //case AgentName.ContactSynchroniser:
                         //    services.Configure<ContactSynchroniserConfiguration>(configuration.GetSection("ContactSynchroniserConfiguration"));

@@ -22,6 +22,7 @@ namespace Fastnet.Apollo.Agents
         }
         protected override void ProcessArtist(Artist artist, DirectoryInfo artistDirectory)
         {
+            log.Debug($"processing {artist.Name}");
             (var validFolders, var invalidFolders) = ValidateWorks(artist, artistDirectory);
             RemoveInvalidFolders(invalidFolders);
             var works = artist.Works.OrderBy(w => w.Name);

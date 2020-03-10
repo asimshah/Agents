@@ -1,17 +1,19 @@
-﻿using System.ComponentModel;
+﻿using System;
+using System.ComponentModel;
 
 namespace Fastnet.Apollo.Agents
 {
     public enum AgentName
     {
-        //[Description("Music Resampler")]
-        //MusicResampler,
         [Description("Portable Music Library")]
         PortableMusicLibrary,
         [Description("Music Player")]
         MusicPlayer,
         [Description("Music Library Copier")]
+        [Obsolete]
         MusicLibraryCopier,
+        [Description("Folder Backup")]
+        FolderBackup
         //[Description("Contact Synchroniser")]
         //ContactSynchroniser
     }

@@ -17,13 +17,14 @@ namespace Fastnet.Apollo.Agents
 {
     public class Startup
     {
-        //private readonly ILogger log;
-        public Startup(IConfiguration configuration)
+        private readonly ILogger log;
+        public Startup(IConfiguration configuration, ILogger<Startup> logger)
         {
             Configuration = configuration;
-            //this.log = logger;
+            this.log = logger;
             var version = typeof(Startup).Assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>().InformationalVersion;
-            Debug.WriteLine($"Agents {version.ToString()} site started");
+            //Debug.WriteLine($"Agents {version.ToString()} site started");
+            log.Information($"Agents {version.ToString()} site started");
         }
 
         public IConfiguration Configuration { get; }

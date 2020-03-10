@@ -22,6 +22,7 @@ namespace Fastnet.Apollo.Agents
         }
         protected override void ProcessArtist(Artist artist, DirectoryInfo artistDirectory)
         {
+            log.Debug($"processing {artist.Name}");
             (var validFolders, var invalidFolders) = ValidateCompositions(artist, artistDirectory);
             RemoveInvalidFolders(invalidFolders);
             var compositions = artist.Compositions.OrderBy(c => c.Name);
@@ -38,7 +39,6 @@ namespace Fastnet.Apollo.Agents
                     {
                         var filename = GetCompressedName(movement, trackList);//  GetNextMusicFilename(performanceDirectory, "M");
                         CopyTrack(movement, performanceDirectory, filename);
-
                     }
                 }
             }
@@ -49,7 +49,7 @@ namespace Fastnet.Apollo.Agents
             {
                 Performers = new string[] { track.Performance.Composition.Artist.Name },
                 Album = track.Performance.Composition.Name,
-                Track = (uint)track.Number,
+                Track = (uint) track.MovementNumber,// track.Number,
                 Title = track.Title,
                 Pictures = new[] { new Picture(track.Work.Cover.Data) },
                 Genres = new string[] { this.musicStyle.ToDescription() }
@@ -94,11 +94,11 @@ namespace Fastnet.Apollo.Agents
                 .Select(x => x.CompressedName);
             var validFolders = existingFolders.Where(f => compressedNames.Contains(f.Name, StringComparer.InvariantCultureIgnoreCase));
             var invalidFolders = existingFolders.Except(validFolders, new DirectoryInfoComparer());
-            foreach (var di in validFolders)
-            {
-                //var composition = artist.Compositions.Single(x => x.CompressedName == di.Name);
-                //log.Information($"Artist {artist.Name}, valid folder {di.Name} ({composition.Name})");
-            }
+            //foreach (var di in validFolders)
+            //{
+            //    //var composition = artist.Compositions.Single(x => x.CompressedName == di.Name);
+            //    //log.Information($"Artist {artist.Name}, valid folder {di.Name} ({composition.Name})");
+            //}
             foreach (var di in invalidFolders)
             {
                 log.Information($"Artist {artist.Name}, invalid folder {di.Name}");
@@ -113,11 +113,11 @@ namespace Fastnet.Apollo.Agents
                 .Select(x => x.CompressedName);
             var validFolders = existingFolders.Where(f => compressedNames.Contains(f.Name, StringComparer.InvariantCultureIgnoreCase));
             var invalidFolders = existingFolders.Except(validFolders, new DirectoryInfoComparer());
-            foreach (var di in validFolders)
-            {
-                //var performance = composition.Performances.Single(x => x.CompressedName == di.Name);
-                //log.Information($"Composition {composition.Name}, valid folder {di.Name} ({performance.Performers})");
-            }
+            //foreach (var di in validFolders)
+            //{
+            //    //var performance = composition.Performances.Single(x => x.CompressedName == di.Name);
+            //    //log.Information($"Composition {composition.Name}, valid folder {di.Name} ({performance.Performers})");
+            //}
             foreach (var di in invalidFolders)
             {
                 log.Information($"Composer {composition.Artist.Name}, Composition {composition.Name} ({composition.CompressedName}), folder {di.Name}, performance not found in database");

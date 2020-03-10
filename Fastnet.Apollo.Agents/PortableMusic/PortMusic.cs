@@ -79,23 +79,6 @@ namespace Fastnet.Apollo.Agents
             }
             return (ITaskState)null;
         }
-        //protected async override Task<ITaskState> Start(ITaskState state, params object[] args)
-        //{
-        //    if (args != null && args.Length > 0)
-        //    {
-        //        force = (bool)args.First();
-        //        if (args.Length > 1)
-        //        {
-        //            noChanges = (bool)args.Skip(1).First();
-        //        }
-        //    }
-        //    log.Information($"started, force = {force}, noChanges = {noChanges}");
-        //    using (GetMusicDb())
-        //    {
-        //        await Start(force, noChanges);
-        //    }
-        //    return null;
-        //}
         protected abstract void ProcessArtist(Artist artist, DirectoryInfo artistDirectory);
 
         protected void CopyTrack(Track track, DirectoryInfo dir, string musicFilename)
@@ -161,7 +144,6 @@ namespace Fastnet.Apollo.Agents
         {
             return string.Join("", name.Split(Path.GetInvalidFileNameChars()));
         }
-
         protected void RemoveInvalidFolders(IEnumerable<DirectoryInfo> invalidFolders)
         {
             foreach (var di in invalidFolders)
@@ -193,7 +175,7 @@ namespace Fastnet.Apollo.Agents
             log.Information("started");
             RemoveInvalidArtistDirectories();
             var artists = await musicDb.Artists
-                .Where(a => a.ArtistStyles.Select(x => x.StyleId).Contains(this.musicStyle))
+                .Where(a => a.Type != ArtistType.Various && a.ArtistStyles.Select(x => x.StyleId).Contains(this.musicStyle))
                 .ToArrayAsync();
 
             foreach (var artist in artists.OrderBy(x => x.Name))
@@ -203,7 +185,9 @@ namespace Fastnet.Apollo.Agents
                 {
                     if (artistDirectory.LastWriteTimeUtc <= artist.LastModified.UtcDateTime)
                     {
+                        log.Debug($"{artist.Name} db record modified since last write to porting folder");
                         artistDirectory.Clear();
+                        log.Information($"{artist.Name} previous porting folder cleared");
                         //ClearContents(artistDirectory);
                     }
 
@@ -283,17 +267,6 @@ namespace Fastnet.Apollo.Agents
             var mp3File = mf.File;
             var targetFile = Path.Combine(dir.FullName, $"{musicFileName}.mp3");
             CopyFile(mf.Track, mp3File, targetFile);
-            //var targetFile = Path.Combine(this.musicConfiguration.PortableLibraryRoot, relativeNameWithoutExtension + ".mp3");
-            //if (noChanges)
-            //{
-            //    log.Information($"Would copy {mp3File} to {targetFile}");
-            //    //Debugger.Break();
-            //}
-            //else
-            //{
-            //    CopyFile(mf.Track, mp3File, targetFile);
-            //    //UpdateIdTags(work, track, targetFile);
-            //}
         }
         private void CopyVBR(MusicFile mf, DirectoryInfo dir, string musicFileName)
         {
@@ -313,29 +286,6 @@ namespace Fastnet.Apollo.Agents
             {
                 log.Warning($"{vbrFile} not found");
             }
-            //var root = this.flacRoots.SingleOrDefault(x => string.Compare(x.SourceRoot, sourceRoot, true) == 0);
-            //if (root != null)
-            //{
-            //    var baseFileName = mf.File.Substring(mf.DiskRoot.Length + 1);
-            //    var relativeNameWithoutExtension = Path.Combine(Path.GetDirectoryName(baseFileName), Path.GetFileNameWithoutExtension(baseFileName));
-            //    //var vbrFile = Path.Combine(root.TargetRoot, relativeNameWithoutExtension + ".mp3");
-            //    var vbrFile = Path.Combine(generatedSource.DiskRoot, relativeNameWithoutExtension + ".mp3");
-            //    var targetFile = Path.Combine(dir.FullName, $"{musicFileName}.mp3");// GetTargetFilename(track);// Path.Combine(this.musicConfiguration.PortableLibraryRoot, this.musicStyle.ToDescription(), work.Artist.Name, work.Name, $"{track.Number.ToString("#00")} - {track.Title}.mp3");// Path.Combine(this.musicConfiguration.PortableLibraryRoot, relativeNameWithoutExtension + ".mp3");
-            //    if (System.IO.File.Exists(vbrFile))
-            //    {
-            //        CopyFile(mf.Track, vbrFile, targetFile);
-            //        //UpdateIdTags(work, track, targetFile);
-            //    }
-            //    else
-            //    {
-            //        log.Warning($"{vbrFile} not found");
-            //    }
-            //}
-            //else
-            //{
-            //    log.Warning($"no conversion map found for {mf.DiskRoot}");
-            //}
-
         }
         private void CopyFile(Track track, string source, string destination)
         {
@@ -350,7 +300,7 @@ namespace Fastnet.Apollo.Agents
                     if (match == false || src.LastWriteTimeUtc > dest.LastWriteTimeUtc /*|| force*/)
                     {
                         System.IO.File.Delete(destination);
-                        log.Information($"{destination} deleted");
+                        log.Information($"{destination} deleted: {(match == false ? "tags did not match" : "original modified later")}");
                     }
                 }
                 if (!System.IO.File.Exists(destination))
@@ -361,32 +311,6 @@ namespace Fastnet.Apollo.Agents
                     //UpdateIdTags(track, destination);
                     log.Information($"{destination} created");
                 }
-                //if (noChanges)
-                //{
-                //    log.Information($"would try to copy {source} to {destination}");
-                //}
-                //else
-                //{
-                //    if (System.IO.File.Exists(destination))
-                //    {
-                //        var match = CompareTags(track, destination);
-                //        var src = new FileInfo(source);
-                //        var dest = new FileInfo(destination);
-                //        if (match == false || src.LastWriteTimeUtc > dest.LastWriteTimeUtc || force)
-                //        {
-                //            System.IO.File.Delete(destination);
-                //            log.Information($"{destination} deleted");
-                //        }
-                //    }
-                //    if (!System.IO.File.Exists(destination))
-                //    {
-                //        System.IO.File.Copy(source, destination);
-                //        var tags = LoadTags(track);
-                //        tags.WriteTags(destination);
-                //        //UpdateIdTags(track, destination);
-                //        log.Information($"{destination} created");
-                //    }
-                //}
             }
             else
             {
