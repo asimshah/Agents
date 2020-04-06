@@ -2,9 +2,10 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp3.1</TargetFramework>
-    <Version>2.1.5</Version>
+    <Version>2.1.6</Version>
     <Authors>Asim Shah</Authors>
     <Product>Fastnet Agents</Product>
+    <AssemblyVersion>2.$([System.DateTime]::Now.ToString('yyyy')).$([System.DateTime]::Now.ToString('Mdd')).$([System.DateTime]::Now.ToString('HHmm'))</AssemblyVersion>
   </PropertyGroup>
 
   <ItemGroup>
