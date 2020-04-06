@@ -305,11 +305,17 @@ namespace Fastnet.Apollo.Agents
                 }
                 if (!System.IO.File.Exists(destination))
                 {
-                    System.IO.File.Copy(source, destination);
-                    var tags = LoadTags(track);
-                    tags.WriteTags(destination);
-                    //UpdateIdTags(track, destination);
-                    log.Information($"{destination} created");
+                    try
+                    {
+                        System.IO.File.Copy(source, destination);
+                        var tags = LoadTags(track);
+                        tags.WriteTags(destination);
+                        log.Information($"{destination} created");
+                    }
+                    catch (Exception xe)
+                    {
+                        log.Error(xe, $"copy {source} to {destination} failed");                        
+                    }
                 }
             }
             else
