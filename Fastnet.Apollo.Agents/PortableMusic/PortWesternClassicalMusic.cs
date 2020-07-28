@@ -11,38 +11,89 @@ using System.Collections.Generic;
 using System;
 using Microsoft.AspNetCore.Hosting;
 using System.Threading.Tasks;
+using System.Diagnostics;
 
 namespace Fastnet.Apollo.Agents
 {
+
     public class PortWesternClassicalMusic : PortMusic
     {
         public PortWesternClassicalMusic(MusicOptions musicOptions, IConfiguration configuration, IWebHostEnvironment environment,
             PortabilityConfiguration portConfig) : base(musicOptions, MusicStyles.WesternClassical, configuration, environment, portConfig)
         {
         }
-        protected override void ProcessArtist(Artist artist, DirectoryInfo artistDirectory)
+        protected override Task StartAsync(IEnumerable<ArtistSet> artistSets)
         {
-            log.Debug($"processing {artist.Name}");
-            (var validFolders, var invalidFolders) = ValidateCompositions(artist, artistDirectory);
-            RemoveInvalidFolders(invalidFolders);
-            var compositions = artist.Compositions.OrderBy(c => c.Name);
-            foreach (var composition in compositions)
+            // ignore artistSets as WesternClassical does not handle multiple artists for one work
+            // this is because is by composition and performance and compositions can only have one artist
+
+            Debug.Assert(artistSets.All(x => x.Artists.Count() == 1));
+
+            //var artists = musicDb.ArtistStyles.Where(x => x.StyleId == MusicStyles.WesternClassical)
+            //    .Where(x => x.Artist.Type != ArtistType.Various)
+            //    .Select(x => x.Artist);
+            //var firstCount = artists.Count();
+            //var secondCount = artistSets.Count();
+            //var a1 = artists.ToArray();
+            //var a2 = artistSets.ToArray();
+            //Debug.Assert(artists.Count() == artistSets.Count());
+            foreach(var artist in artistSets.SelectMany(x => x.Artists).OrderBy(x => x.Name))
             {
-                var compositionDirectory = GetDirectoryInfo(Path.Combine(artistDirectory.FullName, GetCompressedName(composition)));// GetNextDirectory(artistDirectory, "C");// GetCompositionDirectory(artistDirectory, composition);
-                ValidatePerformances(composition, compositionDirectory);
-                foreach (var performance in composition.Performances)
-                {
-                    var performanceDirectory = GetDirectoryInfo(Path.Combine(compositionDirectory.FullName, GetCompressedName(performance))); //GetNextDirectory(compositionDirectory, "P");
-                    ValidateMovements(performance, performanceDirectory);
-                    var trackList = performance.Movements.ToArray();
-                    foreach (var movement in performance.Movements)
-                    {
-                        var filename = GetCompressedName(movement, trackList);//  GetNextMusicFilename(performanceDirectory, "M");
-                        CopyTrack(movement, performanceDirectory, filename);
-                    }
-                }
+                (var fnp, var cnp) = GetArtistDirectories(artist);
+                ProcessArtist(artist, fnp, cnp);
+            }
+            return Task.CompletedTask;
+        }
+        private  void ProcessArtist(Artist artist, DirectoryInfo fullNamePath, DirectoryInfo compressedNamePath)
+        {
+            //(_, var invalidFullNameFolders) = ValidateFullNameCompositions(artist, fullNamePath);
+            //RemoveInvalidFolders(invalidFullNameFolders);
+            //(_, var invalidCompressedNameFolders) = ValidateCompressedNameCompositions(artist, compressedNamePath);
+            //RemoveInvalidFolders(invalidCompressedNameFolders);
+            //var compositions = artist.Compositions.OrderBy(c => c.Name);
+            //foreach (var composition in compositions)
+            //{
+            //    foreach(var item in composition.Performances.Select(x => new { Performance = x, Name = GetPerformanceFullName(x) })
+            //        .OrderBy(x => x.Name))
+            //    {
+
+            //    }
+            //    var compositionDirectory = GetDirectoryInfo(Path.Combine(compressedNamePath.FullName, GetCompressedName(composition)));
+            //    (_, invalidCompressedNameFolders) = ValidateCompressedNamePerformances(composition, compositionDirectory);
+            //    RemoveInvalidFolders(invalidCompressedNameFolders);
+            //    foreach (var performance in composition.Performances)
+            //    {
+            //        PortPerformanceUsingCompressedNames(compositionDirectory, performance);
+            //    }
+            //}
+
+            var performanceTuples = artist.Compositions.SelectMany(x => x.Performances)
+                .Select(x => new PerformanceTuple { Performance = x, Name = GetPerformanceFullName(x) })
+                .OrderBy(x => x.Name);
+            (_, var invalidFullNameFolders) = ValidateFullNamePerformanceFolders(/*artist,*/ fullNamePath, performanceTuples);
+            RemoveInvalidFolders(invalidFullNameFolders);
+            (_,  invalidFullNameFolders) = ValidateCompressedNamePerformanceFolders(/*artist,*/ compressedNamePath, performanceTuples);
+            RemoveInvalidFolders(invalidFullNameFolders);
+            foreach(var tuple in performanceTuples)
+            {
+                PortPerformance(fullNamePath, tuple.Performance, tuple.Name, (m, tl) => { return $"{m.MovementNumber:#00} {GetPathSafeName(m.Title)}"; }, ValidateMovementsUsingFullNames);
+                PortPerformance(compressedNamePath, tuple.Performance, GetCompressedName(tuple.Performance), (m, tl) => GetCompressedName(m, tl), ValidateMovementsUsingCompressedNames);
             }
         }
+
+        private string GetCompressedName(Performance performance)
+        {
+            if (string.IsNullOrWhiteSpace(performance.CompressedName))
+            {
+                var existingNames = performance.Composition.Performances
+                    .Where(x => !string.IsNullOrWhiteSpace(x.CompressedName))
+                    .Select(x => x.CompressedName);
+                performance.CompressedName = GetNextUniqueName("P", existingNames);
+                musicDb.SaveChanges();
+            }
+            return performance.CompressedName;
+        }
+
         internal override CopiedTags LoadTags(Track track)
         {
             var ct = new CopiedTags
@@ -51,13 +102,14 @@ namespace Fastnet.Apollo.Agents
                 Album = track.Performance.Composition.Name,
                 Track = (uint) track.MovementNumber,// track.Number,
                 Title = track.Title,
-                Pictures = new[] { new Picture(track.Work.Cover.Data) },
+                //Pictures = new[] { new Picture(track.Work.Cover.Data) },
                 Genres = new string[] { this.musicStyle.ToDescription() }
             };
+            SetPicture(ct, track);
             var perfomanceCount = track.Performance.Composition.Performances.Count();
             if(perfomanceCount > 1)
             {
-                var index = track.Performance.Composition.Performances.OrderBy(x => x.Performers).ToList().IndexOf(track.Performance);
+                var index = track.Performance.Composition.Performances.OrderBy(x => x.GetAllPerformersCSV()).ToList().IndexOf(track.Performance);
                 ct.Album = $"{track.Performance.Composition.Name} ({index + 1})";
             }
             return ct;
@@ -74,74 +126,92 @@ namespace Fastnet.Apollo.Agents
             }
             return composition.CompressedName;
         }
-        private string GetCompressedName(Performance performance)
+
+        //private (IEnumerable<DirectoryInfo> validFolders, IEnumerable<DirectoryInfo> invalidFolders) ValidateFullNameCompositions(Artist artist, DirectoryInfo artistDirectory)
+        //{
+        //    var existingFolders = artistDirectory.EnumerateDirectories();
+        //    var fullNames = artist.Compositions
+        //        .Where(c => !string.IsNullOrWhiteSpace(c.Name))
+        //        .Select(x => x.Name);
+        //    var validFolders = existingFolders.Where(f => fullNames.Contains(f.Name, StringComparer.InvariantCultureIgnoreCase));
+        //    var invalidFolders = existingFolders.Except(validFolders, new DirectoryInfoComparer());
+        //    foreach (var di in validFolders)
+        //    {
+        //        var composition = artist.Compositions.Single(x => x.Name == di.Name);
+        //        log.Trace($"Artist {artist.Name}, valid folder {di.Name} ({composition.Name})");
+        //    }
+        //    foreach (var di in invalidFolders)
+        //    {
+        //        log.Information($"Artist {artist.Name}, invalid folder {di.Name}");
+        //    }
+        //    return (validFolders, invalidFolders);
+        //}
+        //private (IEnumerable<DirectoryInfo> validFolders, IEnumerable<DirectoryInfo> invalidFolders) ValidateCompressedNameCompositions(Artist artist, DirectoryInfo artistDirectory)
+        //{
+        //    var existingFolders = artistDirectory.EnumerateDirectories();
+        //    var compressedNames = artist.Compositions
+        //        .Where(c => !string.IsNullOrWhiteSpace(c.CompressedName))
+        //        .Select(x => x.CompressedName);
+        //    var validFolders = existingFolders.Where(f => compressedNames.Contains(f.Name, StringComparer.InvariantCultureIgnoreCase));
+        //    var invalidFolders = existingFolders.Except(validFolders, new DirectoryInfoComparer());
+        //    foreach (var di in validFolders)
+        //    {
+        //        var composition = artist.Compositions.Single(x => x.CompressedName == di.Name);
+        //        log.Trace($"Artist {artist.Name}, valid folder {di.Name} ({composition.Name})");
+        //    }
+        //    foreach (var di in invalidFolders)
+        //    {
+        //        log.Information($"Artist {artist.Name}, invalid folder {di.Name}");
+        //    }
+        //    return (validFolders, invalidFolders);
+        //}
+        //private (IEnumerable<DirectoryInfo> validFolders, IEnumerable<DirectoryInfo> invalidFolders) ValidateCompressedNamePerformances(Composition composition, DirectoryInfo compositionDirectory)
+        //{
+        //    var existingFolders = compositionDirectory.EnumerateDirectories();
+        //    var compressedNames = composition.Performances
+        //        .Where(p => !string.IsNullOrWhiteSpace(p.CompressedName))
+        //        .Select(x => x.CompressedName);
+        //    var validFolders = existingFolders.Where(f => compressedNames.Contains(f.Name, StringComparer.InvariantCultureIgnoreCase));
+        //    var invalidFolders = existingFolders.Except(validFolders, new DirectoryInfoComparer());
+        //    foreach (var di in validFolders)
+        //    {
+        //        var performance = composition.Performances.Single(x => x.CompressedName == di.Name);
+        //        log.Trace($"Composition {composition.Name}, valid folder {di.Name} ({performance.GetAllPerformersCSV()})");
+        //    }
+        //    foreach (var di in invalidFolders)
+        //    {
+        //        log.Information($"Composer {composition.Artist.Name}, Composition {composition.Name} ({composition.CompressedName}), folder {di.Name}, performance not found in database");
+        //    }
+        //    return (validFolders, invalidFolders);
+        //}
+        //private (IEnumerable<DirectoryInfo> validFolders, IEnumerable<DirectoryInfo> invalidFolders) ValidateFullNamePerformances(Composition composition, DirectoryInfo compositionDirectory)
+        //{
+        //    var existingFolders = compositionDirectory.EnumerateDirectories();
+        //    var compressedNames = composition.Performances
+        //        .Where(p => !string.IsNullOrWhiteSpace(p.CompressedName))
+        //        .Select(x => x.CompressedName);
+        //    var validFolders = existingFolders.Where(f => compressedNames.Contains(f.Name, StringComparer.InvariantCultureIgnoreCase));
+        //    var invalidFolders = existingFolders.Except(validFolders, new DirectoryInfoComparer());
+        //    foreach (var di in validFolders)
+        //    {
+        //        var performance = composition.Performances.Single(x => x.CompressedName == di.Name);
+        //        log.Trace($"Composition {composition.Name}, valid folder {di.Name} ({performance.GetAllPerformersCSV()})");
+        //    }
+        //    foreach (var di in invalidFolders)
+        //    {
+        //        log.Information($"Composer {composition.Artist.Name}, Composition {composition.Name} ({composition.CompressedName}), folder {di.Name}, performance not found in database");
+        //    }
+        //    return (validFolders, invalidFolders);
+        //}
+        private string GetPerformanceFullName(Performance performance)
         {
-            if (string.IsNullOrWhiteSpace(performance.CompressedName))
+            var name = performance.Composition.Name;
+            if(performance.Composition.Performances.Count() > 1)
             {
-                var existingNames = performance.Composition.Performances
-                    .Where(x => !string.IsNullOrWhiteSpace(x.CompressedName))
-                    .Select(x => x.CompressedName);
-                performance.CompressedName = GetNextUniqueName("P", existingNames);
-                musicDb.SaveChanges();
+                var index = performance.Composition.Performances.OrderBy(x => x.GetAllPerformersCSV()).ToList().IndexOf(performance);
+                name = $"{performance.Composition.Name} ({index + 1})";
             }
-            return performance.CompressedName;
-        }
-        private (IEnumerable<DirectoryInfo> validFolders, IEnumerable<DirectoryInfo> invalidFolders) ValidateCompositions(Artist artist, DirectoryInfo artistDirectory)
-        {
-            var existingFolders = artistDirectory.EnumerateDirectories();
-            var compressedNames = artist.Compositions
-                .Where(c => !string.IsNullOrWhiteSpace(c.CompressedName))
-                .Select(x => x.CompressedName);
-            var validFolders = existingFolders.Where(f => compressedNames.Contains(f.Name, StringComparer.InvariantCultureIgnoreCase));
-            var invalidFolders = existingFolders.Except(validFolders, new DirectoryInfoComparer());
-            //foreach (var di in validFolders)
-            //{
-            //    //var composition = artist.Compositions.Single(x => x.CompressedName == di.Name);
-            //    //log.Information($"Artist {artist.Name}, valid folder {di.Name} ({composition.Name})");
-            //}
-            foreach (var di in invalidFolders)
-            {
-                log.Information($"Artist {artist.Name}, invalid folder {di.Name}");
-            }
-            return (validFolders, invalidFolders);
-        }
-        private (IEnumerable<DirectoryInfo> validFolders, IEnumerable<DirectoryInfo> invalidFolders) ValidatePerformances(Composition composition, DirectoryInfo compositionDirectory)
-        {
-            var existingFolders = compositionDirectory.EnumerateDirectories();
-            var compressedNames = composition.Performances // artist.Compositions
-                .Where(c => !string.IsNullOrWhiteSpace(c.CompressedName))
-                .Select(x => x.CompressedName);
-            var validFolders = existingFolders.Where(f => compressedNames.Contains(f.Name, StringComparer.InvariantCultureIgnoreCase));
-            var invalidFolders = existingFolders.Except(validFolders, new DirectoryInfoComparer());
-            //foreach (var di in validFolders)
-            //{
-            //    //var performance = composition.Performances.Single(x => x.CompressedName == di.Name);
-            //    //log.Information($"Composition {composition.Name}, valid folder {di.Name} ({performance.Performers})");
-            //}
-            foreach (var di in invalidFolders)
-            {
-                log.Information($"Composer {composition.Artist.Name}, Composition {composition.Name} ({composition.CompressedName}), folder {di.Name}, performance not found in database");
-            }
-            return (validFolders, invalidFolders);
-        }
-        private (IEnumerable<string> validFiles, IEnumerable<string> invalidFiles) ValidateMovements(Performance performance, DirectoryInfo performanceDirectory)
-        {
-            var existingFiles = performanceDirectory.EnumerateFiles().Select(fi => Path.GetFileNameWithoutExtension(fi.Name));
-            var compressedNames = performance.Movements // work.Tracks
-                .Where(w => !string.IsNullOrWhiteSpace(w.CompressedName))
-                .Select(x => x.CompressedName);
-            var validFiles = existingFiles.Where(f => compressedNames.Contains(f, StringComparer.InvariantCultureIgnoreCase));
-            var invalidFiles = existingFiles.Except(validFiles, StringComparer.InvariantCultureIgnoreCase);
-            foreach (var file in validFiles)
-            {
-                var movement = performance.Movements.Single(x => x.CompressedName == file);
-                //log.Information($"Work {work.Name}, valid file {file} ({track.Title})");
-            }
-            foreach (var file in invalidFiles)
-            {
-                log.Information($"Performance {performance.Composition.Name}, {performance.Performers}, invalid file {file}");
-            }
-            return (validFiles, invalidFiles);
+            return name;
         }
     }
 }

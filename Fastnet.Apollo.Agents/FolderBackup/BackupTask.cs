@@ -141,6 +141,12 @@ namespace Fastnet.Apollo.Agents
             foreach (var name in destinationOnlyNames)
             {
                 var file = Path.Combine(destinationDi.FullName, name);
+                var fi = new FileInfo(file);
+                if(fi.Attributes.HasFlag(FileAttributes.ReadOnly))
+                {
+                    fi.Attributes &= ~FileAttributes.ReadOnly;
+                    log.Information($"{fi.FullName} read only attribute unset");
+                }
                 File.Delete(file);
                 log.Information($"{file} deleted - not found in source");
             }
@@ -151,6 +157,14 @@ namespace Fastnet.Apollo.Agents
                 if (!destFileInfo.Exists || destFileInfo.Length != srcFileInfo.Length || srcFileInfo.LastWriteTime > destFileInfo.LastWriteTime)
                 {
                     var overWritten = destFileInfo.Exists;
+                    if (overWritten)
+                    {
+                        if (destFileInfo.Attributes.HasFlag(FileAttributes.ReadOnly))
+                        {
+                            destFileInfo.Attributes &= ~FileAttributes.ReadOnly;
+                            log.Information($"{destFileInfo.FullName} read only attribute unset");
+                        }
+                    }
                     srcFileInfo.CopyTo(destFileInfo.FullName, true);
                     log.Information($"{destFileInfo.FullName} created{(overWritten ? " - existing file overwritten" : "")}");
                 }

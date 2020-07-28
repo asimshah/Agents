@@ -39,6 +39,7 @@ namespace Fastnet.Apollo.Agents
             if (this.musicPlayer != null)
             {
                 var pc = await this.Request.FromBody<PlayerCommand>();
+                log.Information($"{pc}");
                 await Task.Run(() => musicPlayer.ExecutePlayerCommand(pc));
             }
             //musicPlayer.ExecutePlayerCommand(pc);

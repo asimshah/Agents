@@ -22,9 +22,19 @@ namespace Fastnet.Apollo.Agents
         {
             Configuration = configuration;
             this.log = logger;
+            //var version = typeof(Startup).Assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>().InformationalVersion;
+            //log.Information($"Agents {version.ToString()} site started");
+            var packageVersion = GetPackageVersion();
+            var assemblyVersion = GetAssemblyVersion();
             var version = typeof(Startup).Assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>().InformationalVersion;
-            //Debug.WriteLine($"Agents {version.ToString()} site started");
-            log.Information($"Agents {version.ToString()} site started");
+            var name = Process.GetCurrentProcess().ProcessName;
+            log.Information($"Agents {packageVersion} site started ({name})");
+            var versions = GetVersions();
+            log.Information($"using versions:");
+            foreach (var item in versions.OrderBy(x => x))
+            {
+                log.Information($"   {item}");
+            }
         }
 
         public IConfiguration Configuration { get; }
@@ -72,6 +82,28 @@ namespace Fastnet.Apollo.Agents
                 endpoints.MapControllers();
                 endpoints.MapRazorPages();
             });
+        }
+        private string GetPackageVersion()
+        {
+            return System.Reflection.Assembly.GetExecutingAssembly().GetPackageVersion();
+        }
+        // move this to Fastnet.Core
+        private string GetAssemblyVersion()
+        {
+            return System.Reflection.Assembly.GetExecutingAssembly().GetAssemblyVersion();
+        }
+        private IEnumerable<string> GetVersions()
+        {
+            var list = new List<string>();
+            foreach (var assemblyName in System.Reflection.Assembly.GetExecutingAssembly().GetReferencedAssemblies())
+            {
+                if (assemblyName.Name.StartsWith("fastnet", System.Globalization.CompareOptions.IgnoreCase))
+                {
+                    var assembly = Assembly.Load(assemblyName);
+                    list.Add($"{assemblyName.Name}, {assembly.GetPackageVersion()}");
+                }
+            }
+            return list;
         }
     }
 }

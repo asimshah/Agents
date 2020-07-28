@@ -123,7 +123,7 @@ namespace Fastnet.Apollo.Agents
                     log.Information($"music server hub connecting ...");
                     await Task.Delay(delayMilliSeconds);
                     this.hubConnection = new HubConnectionBuilder()
-                        .WithUrl($"{musicServerUrl}/playhub")
+                        .WithUrl($"{musicServerUrl}/messagehub")
                         .Build();
                     log.Information($"music server url is {musicServerUrl}");
                     this.hubConnection.Closed += async (error) =>
@@ -198,7 +198,7 @@ namespace Fastnet.Apollo.Agents
                     }
                     catch (Exception xe)
                     {
-                        log.Warning($"error {xe.Message} occurred");
+                        log.Error($"error {xe.Message} occurred");
                         //Debugger.Break();
                         //throw;
                     }

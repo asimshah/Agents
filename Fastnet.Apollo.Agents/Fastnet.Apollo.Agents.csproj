@@ -2,16 +2,26 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp3.1</TargetFramework>
-    <Version>2.1.6</Version>
+    <DayCount>$([System.DateTime]::UtcNow.Date.Subtract($([System.DateTime]::Parse("2020-01-01"))).TotalDays)</DayCount>
+    <MinuteCount>$([System.DateTime]::UtcNow.TimeOfDay.TotalMinutes.ToString("000#"))</MinuteCount>
+    <DayVersion>2.$(DayCount).$(MinuteCount)</DayVersion>
+    <FastnetVersion>2.$([System.DateTime]::Now.ToString('yyMM')).$([System.DateTime]::Now.ToString('ddHH')).$([System.DateTime]::Now.ToString("mmss"))</FastnetVersion>
+    <Version>$(DayVersion)</Version>
+    <AssemblyVersion>$(FastnetVersion)</AssemblyVersion>
+    <FileVersion>$(FastnetVersion)</FileVersion>
     <Authors>Asim Shah</Authors>
     <Product>Fastnet Agents</Product>
-    <AssemblyVersion>2.$([System.DateTime]::Now.ToString('yyyy')).$([System.DateTime]::Now.ToString('Mdd')).$([System.DateTime]::Now.ToString('HHmm'))</AssemblyVersion>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <NoWarn>1701,1702,IDE0063</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Fastnet.Music.Data" Version="2.1.6" />
-    <PackageReference Include="Fastnet.Music.Messages" Version="2.1.6" />
-    <PackageReference Include="Fastnet.Music.Taglib" Version="2.0.161" />
+    <PackageReference Include="Fastnet.Core.Web" Version="2.179.800" />
+    <PackageReference Include="Fastnet.Music.Data" Version="2.206.1004" />
+    <PackageReference Include="Fastnet.Music.Messages" Version="2.179.802" />
+    <PackageReference Include="Fastnet.Music.Taglib" Version="2.151.1274" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="3.1.1" />
     <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="3.1.1" />
     <PackageReference Include="NAudio" Version="1.10.0" />

@@ -7,6 +7,7 @@ namespace Fastnet.Apollo.Agents
 {
     public class PortabilityConfiguration
     {
-        public string PortableLibraryRoot { get; set; }
+        public string CompressedNamesRoot { get; set; }
+        public string FullNamesRoot { get; set; }
     }
 }

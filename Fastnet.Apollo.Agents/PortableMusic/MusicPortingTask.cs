@@ -63,6 +63,9 @@ namespace Fastnet.Apollo.Agents
                     case MusicStyles.WesternClassical:
                         list.Add(new PortWesternClassicalMusic(musicOptions, configuration, environment, portabilityConfiguration/*, resamplingOptions*/));
                         break;
+                    case MusicStyles.IndianClassical:
+                        list.Add(new PortIndianClassicalMusic(musicOptions, configuration, environment, portabilityConfiguration));
+                        break;
                 }
                 
             }
