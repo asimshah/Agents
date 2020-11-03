@@ -58,16 +58,31 @@ namespace Fastnet.Apollo.Agents
                 switch(style)
                 {
                     case MusicStyles.Popular:
-                        list.Add(new PortPopularMusic(musicOptions, configuration, environment, portabilityConfiguration));
+                        list.Add(new PortPopularMusicFN(musicOptions, configuration, environment, portabilityConfiguration));
                         break;
                     case MusicStyles.WesternClassical:
-                        list.Add(new PortWesternClassicalMusic(musicOptions, configuration, environment, portabilityConfiguration/*, resamplingOptions*/));
+                        list.Add(new PortWesternClassicalMusicFN(musicOptions, configuration, environment, portabilityConfiguration/*, resamplingOptions*/));
                         break;
                     case MusicStyles.IndianClassical:
-                        list.Add(new PortIndianClassicalMusic(musicOptions, configuration, environment, portabilityConfiguration));
+                        list.Add(new PortIndianClassicalMusicFN(musicOptions, configuration, environment, portabilityConfiguration));
                         break;
                 }
-                
+                if (portabilityConfiguration.CompressedNamesRoot != null)
+                {
+                    switch (style)
+                    {
+                        case MusicStyles.Popular:
+                            list.Add(new PortPopularMusicCN(musicOptions, configuration, environment, portabilityConfiguration));
+                            break;
+                        case MusicStyles.WesternClassical:
+                            list.Add(new PortWesternClassicalMusicCN(musicOptions, configuration, environment, portabilityConfiguration/*, resamplingOptions*/));
+                            break;
+                        case MusicStyles.IndianClassical:
+                            list.Add(new PortIndianClassicalMusicCN(musicOptions, configuration, environment, portabilityConfiguration));
+                            break;
+                    }
+                }
+
             }
 
             CreatePipeline(list);

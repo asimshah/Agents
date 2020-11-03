@@ -126,6 +126,7 @@ namespace Fastnet.Apollo.Agents
         public async Task Play(string macAddress, string url)
         {
             string query = $"anyurl?p0=playlist&p1=play&p2={url}&player={macAddress}";
+            log.Debug(query);
             await GetAsync(query);
         }
         public async Task<LogitechDeviceStatus> PlayerInformation(string macAddress)

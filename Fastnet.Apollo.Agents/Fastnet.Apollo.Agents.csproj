@@ -18,9 +18,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Fastnet.Core.Web" Version="2.179.800" />
-    <PackageReference Include="Fastnet.Music.Data" Version="2.206.1004" />
-    <PackageReference Include="Fastnet.Music.Messages" Version="2.179.802" />
+    <PackageReference Include="Fastnet.Core.Web" Version="2.212.767" />
+    <PackageReference Include="Fastnet.Music.Data" Version="2.212.768" />
+    <PackageReference Include="Fastnet.Music.Messages" Version="2.212.769" />
     <PackageReference Include="Fastnet.Music.Taglib" Version="2.151.1274" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="3.1.1" />
     <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="3.1.1" />

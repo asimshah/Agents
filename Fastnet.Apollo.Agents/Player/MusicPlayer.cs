@@ -309,25 +309,25 @@ namespace Fastnet.Apollo.Agents
                         foreach (var localDevice in listOfLocalAudioDevices)
                         {
                             var confirmedDevice = await msc.ConfirmDevice(localDevice);
-                            //if (confirmedDevice != null)
-                            //{
-                            //    if (confirmedDevice.Enabled)
-                            //    {
-                            //        if (!audioDevices.ContainsKey(confirmedDevice.Key))
-                            //        {
-                            //            // add the device to music player dictionary
-                            //            AddAudioDevice(confirmedDevice);
-                            //        }
-                            //    }
-                            //    else
-                            //    {
-                            //        // device is disabled at the music server
-                            //        if (audioDevices.ContainsKey(confirmedDevice.Key))
-                            //        {
-                            //            await RemoveDevice(confirmedDevice.Key);
-                            //        }
-                            //    }
-                            //}
+                            if (confirmedDevice != null)
+                            {
+                                if (confirmedDevice.Enabled)
+                                {
+                                    if (!audioDevices.ContainsKey(confirmedDevice.Key))
+                                    {
+                                        // add the device to music player dictionary
+                                        AddAudioDevice(confirmedDevice);
+                                    }
+                                }
+                                else
+                                {
+                                    // device is disabled at the music server
+                                    if (audioDevices.ContainsKey(confirmedDevice.Key))
+                                    {
+                                        await RemoveDevice(confirmedDevice.Key);
+                                    }
+                                }
+                            }
                         }
                     }
                     result = true;

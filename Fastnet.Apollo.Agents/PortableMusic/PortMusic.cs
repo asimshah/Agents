@@ -10,46 +10,29 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace Fastnet.Apollo.Agents
 {
-
-    public abstract class PortMusic : IPipelineTask
+    public abstract class PortMusic<T> : IPipelineTask where T : BaseFolderMethods
     {
-        #region Protected Classes
-
-        protected class PerformanceTuple
-        {
-            #region Public Properties
-
-            public string Name { get; set; }
-            public Performance Performance { get; set; }
-
-            #endregion Public Properties
-        }
-
-        #endregion Protected Classes
 
         #region Protected Fields
 
+        protected readonly T folderNamer;
         protected readonly ILogger log;
         protected readonly MusicOptions musicOptions;
         protected readonly MusicStyles musicStyle;
         protected MusicDb musicDb;
         protected PortabilityConfiguration portabilityConfiguration;
-
         #endregion Protected Fields
 
         #region Private Fields
 
         private readonly string connectionString;
-        private readonly Regex safeChars = new Regex(@"[^\sa-zA-Z0-9\p{L}]", RegexOptions.IgnoreCase);
 
         #endregion Private Fields
 
@@ -62,11 +45,12 @@ namespace Fastnet.Apollo.Agents
 
         #region Public Constructors
 
-        public PortMusic(MusicOptions musicOptions, MusicStyles style,
+        public PortMusic(T folderNamer, MusicOptions musicOptions, MusicStyles style,
             IConfiguration configuration,
             IWebHostEnvironment environment,
             PortabilityConfiguration portConfig)
         {
+            this.folderNamer = folderNamer;
             this.musicOptions = musicOptions;
             this.musicStyle = style;
             this.portabilityConfiguration = portConfig;
@@ -138,147 +122,144 @@ namespace Fastnet.Apollo.Agents
             using (musicDb = new MusicDb(connectionString))
             {
                 log.Information("started");
-                //var artistSetList = musicDb.Works
-                //    .Where(w => w.StyleId == this.musicStyle)
-                //    .AsEnumerable()
-                //    .Where(w => !w.Artists.Any(a => a.Type == ArtistType.Various))
-                //    .Select(x => new ArtistSet(x.Artists)).Distinct(new ArtistSetComparer());
+                this.folderNamer.SetDb(musicDb);
                 var artistSetList = this.musicStyle == MusicStyles.WesternClassical ? getSetsUsingCompositions() : getSetsUsingWorks();
-                RemoveInvalidArtistDirectories(artistSetList);
-                ClearModifiedDirectories(artistSetList);
+                folderNamer.RemoveInvalidArtistDirectories(artistSetList);
+                folderNamer.ClearModifiedDirectories(artistSetList);
                 await StartAsync(artistSetList);
             }
             return (ITaskState)null;
         }
-        protected (DirectoryInfo fullnames, DirectoryInfo compressedNames) GetArtistDirectories(ArtistSet artistSet)
-        {
-            var setName = GetCompressedName(artistSet);
-            var setPath = Path.Combine(this.portabilityConfiguration.CompressedNamesRoot, this.musicStyle.ToDescription(), setName);
-            var compressedNames = GetDirectoryInfo(setPath);
-            setName = artistSet.GetNames();
-            setPath = Path.Combine(this.portabilityConfiguration.FullNamesRoot, this.musicStyle.ToDescription(), setName);
-            var fullNames = GetDirectoryInfo(setPath);
-            return (fullNames, compressedNames);
-        }
-        protected (DirectoryInfo fullNamePath, DirectoryInfo compressedNamePath) GetArtistDirectories(Artist artist)
-        {
-            var compressedPath = Path.Combine(this.portabilityConfiguration.CompressedNamesRoot, this.musicStyle.ToDescription(), artist.CompressedName);
-            var fullPath = Path.Combine(this.portabilityConfiguration.FullNamesRoot, this.musicStyle.ToDescription(), artist.Name);
-            return (GetDirectoryInfo(fullPath), GetDirectoryInfo(compressedPath));
-        }
+        //protected (DirectoryInfo fullnames, DirectoryInfo compressedNames) GetArtistDirectories(ArtistSet artistSet)
+        //{
+        //    var setName = GetCompressedName(artistSet);
+        //    var setPath = Path.Combine(this.portabilityConfiguration.CompressedNamesRoot, this.musicStyle.ToDescription(), setName);
+        //    var compressedNames = GetDirectoryInfo(setPath);
+        //    setName = artistSet.GetNames();
+        //    setPath = Path.Combine(this.portabilityConfiguration.FullNamesRoot, this.musicStyle.ToDescription(), setName);
+        //    var fullNames = GetDirectoryInfo(setPath);
+        //    return (fullNames, compressedNames);
+        //}
+        //protected (DirectoryInfo fullNamePath, DirectoryInfo compressedNamePath) GetArtistDirectories(Artist artist)
+        //{
+        //    var compressedPath = Path.Combine(this.portabilityConfiguration.CompressedNamesRoot, this.musicStyle.ToDescription(), artist.CompressedName);
+        //    var fullPath = Path.Combine(this.portabilityConfiguration.FullNamesRoot, this.musicStyle.ToDescription(), artist.Name);
+        //    return (GetDirectoryInfo(fullPath), GetDirectoryInfo(compressedPath));
+        //}
         //protected abstract string GetCompressedName(Performance performance);
-        protected string GetCompressedName(Track track, IEnumerable<Track> trackList)
-        {
-            if (string.IsNullOrWhiteSpace(track.CompressedName))
-            {
-                var existingNames = trackList
-                    .Where(x => !string.IsNullOrWhiteSpace(x.CompressedName))
-                    .Select(x => x.CompressedName);
-                track.CompressedName = GetNextUniqueName("M", existingNames);
-                musicDb.SaveChanges();
-            }
-            return track.CompressedName;
-        }
-        protected string GetCompressedName(ArtistSet artistSet)
-        {
-            string MakeUnique(string name)
-            {
-                var exists = musicDb.Artists.SingleOrDefault(x => x.CompressedName.ToLower() == name.ToLower() /*string.Compare(x.CompressedName, name, true) == 0*/) != null;
-                if (exists)
-                {
-                    int i = 1;
-                    bool done = false;
-                    var baseName = name;
-                    do
-                    {
-                        name = $"{baseName}{(++i).ToString()}";
-                        done = musicDb.Artists.SingleOrDefault(x => x.CompressedName.ToLower() == name.ToLower()/* string.Compare(x.CompressedName, name, true) == 0*/) == null;
-                    } while (!done);
-                }
-                return name;
-            }
-            if (string.IsNullOrWhiteSpace(artistSet.GetCompressedNames()))
-            {
-                try
-                {
-                    foreach (var artist in artistSet.Artists)
-                    {
-                        if (artist.CompressedName == null)
-                        {
-                            var artistName = safeChars.Replace(artist.Name, string.Empty);
-                            var parts = artistName.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
-                            if (parts.Length > 1)
-                            {
-                                static string GetInitial(string name)
-                                {
-                                    return name.Substring(0, 1).ToUpper();
-                                }
-                                var leadParts = parts.Take(parts.Length - 1);
-                                var initials = string.Join("", leadParts.Select(x => GetInitial(x)));
-                                artistName = $"{initials}{parts.Last()}";
-                            }
-                            artistName = MakeUnique(artistName);
-                            artist.CompressedName = artistName;
-                            musicDb.SaveChanges();
-                            log.Information($"{artist.Name} -> {artist.CompressedName}");
-                        }
-                    }
-                }
-                catch (Exception)
-                {
-                    Debugger.Break();
-                    throw;
-                }
-            }
-            return artistSet.GetCompressedNames();
-        }
-        protected string GetCompressedName(Artist artist)
-        {
-            string MakeUnique(string name)
-            {
-                var exists = musicDb.Artists.SingleOrDefault(x => x.CompressedName.ToLower() == name.ToLower() /*string.Compare(x.CompressedName, name, true) == 0*/) != null;
-                if (exists)
-                {
-                    int i = 1;
-                    bool done = false;
-                    var baseName = name;
-                    do
-                    {
-                        name = $"{baseName}{(++i).ToString()}";
-                        done = musicDb.Artists.SingleOrDefault(x => x.CompressedName.ToLower() == name.ToLower()/* string.Compare(x.CompressedName, name, true) == 0*/) == null;
-                    } while (!done);
-                }
-                return name;
-            }
-            if (string.IsNullOrWhiteSpace(artist.CompressedName))
-            {
-                try
-                {
-                    var artistName = safeChars.Replace(artist.Name, string.Empty);
-                    var parts = artistName.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
-                    if (parts.Length > 1)
-                    {
-                        static string GetInitial(string name)
-                        {
-                            return name.Substring(0, 1).ToUpper();
-                        }
-                        var leadParts = parts.Take(parts.Length - 1);
-                        var initials = string.Join("", leadParts.Select(x => GetInitial(x)));
-                        artistName = $"{initials}{parts.Last()}";
-                    }
-                    artistName = MakeUnique(artistName);
-                    artist.CompressedName = artistName;
-                    musicDb.SaveChanges();
-                    log.Information($"{artist.Name} -> {artist.CompressedName}");
-                }
-                catch (Exception)
-                {
-                    Debugger.Break();
-                    throw;
-                }
-            }
-            return artist.CompressedName;
-        }
+        //protected string GetCompressedName(Track track, IEnumerable<Track> trackList)
+        //{
+        //    if (string.IsNullOrWhiteSpace(track.CompressedName))
+        //    {
+        //        var existingNames = trackList
+        //            .Where(x => !string.IsNullOrWhiteSpace(x.CompressedName))
+        //            .Select(x => x.CompressedName);
+        //        track.CompressedName = GetNextUniqueName("M", existingNames);
+
+        //        musicDb.SaveChanges();
+        //    }
+        //    return track.CompressedName;
+        //}
+        //protected string GetCompressedName(ArtistSet artistSet)
+        //{
+        //    string MakeUnique(string name)
+        //    {
+        //        var exists = musicDb.Artists.SingleOrDefault(x => x.CompressedName.ToLower() == name.ToLower() /*string.Compare(x.CompressedName, name, true) == 0*/) != null;
+        //        if (exists)
+        //        {
+        //            int i = 1;
+        //            bool done = false;
+        //            var baseName = name;
+        //            do
+        //            {
+        //                name = $"{baseName}{(++i).ToString()}";
+        //                done = musicDb.Artists.SingleOrDefault(x => x.CompressedName.ToLower() == name.ToLower()/* string.Compare(x.CompressedName, name, true) == 0*/) == null;
+        //            } while (!done);
+        //        }
+        //        return name;
+        //    }
+        //    if (string.IsNullOrWhiteSpace(artistSet.GetCompressedNames()))
+        //    {
+        //        try
+        //        {
+        //            foreach (var artist in artistSet.Artists)
+        //            {
+        //                if (artist.CompressedName == null)
+        //                {
+        //                    var artistName = safeChars.Replace(artist.Name, string.Empty);
+        //                    var parts = artistName.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+        //                    if (parts.Length > 1)
+        //                    {
+        //                        static string GetInitial(string name)
+        //                        {
+        //                            return name.Substring(0, 1).ToUpper();
+        //                        }
+        //                        var leadParts = parts.Take(parts.Length - 1);
+        //                        var initials = string.Join("", leadParts.Select(x => GetInitial(x)));
+        //                        artistName = $"{initials}{parts.Last()}";
+        //                    }
+        //                    artistName = MakeUnique(artistName);
+        //                    artist.CompressedName = artistName;
+        //                    musicDb.SaveChanges();
+        //                    log.Information($"{artist.Name} -> {artist.CompressedName}");
+        //                }
+        //            }
+        //        }
+        //        catch (Exception)
+        //        {
+        //            Debugger.Break();
+        //            throw;
+        //        }
+        //    }
+        //    return artistSet.GetCompressedNames();
+        //}
+        //protected string GetCompressedName(Artist artist)
+        //{
+        //    string MakeUnique(string name)
+        //    {
+        //        var exists = musicDb.Artists.SingleOrDefault(x => x.CompressedName.ToLower() == name.ToLower() /*string.Compare(x.CompressedName, name, true) == 0*/) != null;
+        //        if (exists)
+        //        {
+        //            int i = 1;
+        //            bool done = false;
+        //            var baseName = name;
+        //            do
+        //            {
+        //                name = $"{baseName}{(++i).ToString()}";
+        //                done = musicDb.Artists.SingleOrDefault(x => x.CompressedName.ToLower() == name.ToLower()/* string.Compare(x.CompressedName, name, true) == 0*/) == null;
+        //            } while (!done);
+        //        }
+        //        return name;
+        //    }
+        //    if (string.IsNullOrWhiteSpace(artist.CompressedName))
+        //    {
+        //        try
+        //        {
+        //            var artistName = safeChars.Replace(artist.Name, string.Empty);
+        //            var parts = artistName.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+        //            if (parts.Length > 1)
+        //            {
+        //                static string GetInitial(string name)
+        //                {
+        //                    return name.Substring(0, 1).ToUpper();
+        //                }
+        //                var leadParts = parts.Take(parts.Length - 1);
+        //                var initials = string.Join("", leadParts.Select(x => GetInitial(x)));
+        //                artistName = $"{initials}{parts.Last()}";
+        //            }
+        //            artistName = MakeUnique(artistName);
+        //            artist.CompressedName = artistName;
+        //            musicDb.SaveChanges();
+        //            log.Information($"{artist.Name} -> {artist.CompressedName}");
+        //        }
+        //        catch (Exception)
+        //        {
+        //            Debugger.Break();
+        //            throw;
+        //        }
+        //    }
+        //    return artist.CompressedName;
+        //}
         protected DirectoryInfo GetDirectoryInfo(string path)
         {
             if (!Directory.Exists(path))
@@ -287,44 +268,16 @@ namespace Fastnet.Apollo.Agents
             }
             return new DirectoryInfo(path);
         }
-        protected string GetNextUniqueName(string initialLetter, IEnumerable<string> existingNames)
-        {
-            bool done = false;
-            int i = 0;
-            string name;// = null;
-            do
-            {
-                ++i;
-                name = $"{initialLetter}{i.ToString("x6")}";
-                if (!existingNames.Contains(name))
-                {
-                    done = true;
-                }
-            } while (!done);
-            return name;
-        }
         protected string GetPathSafeName(string name)
         {
             name = name.Replace("\"", "'");
             return string.Join("", name.Split(Path.GetInvalidFileNameChars()));
         }
-        protected IEnumerable<Work> GetWorks(ArtistSet artistSet)
+        protected void PortPerformance(DirectoryInfo parentDirectory, PerformanceTuple tuple, IEnumerable<Performance> allPerformances = null)
         {
-            var allWorksByTheseArtists = musicDb.ArtistWorkList.Where(x => artistSet.ArtistIds.Contains(x.ArtistId))
-                .Select(x => x.Work).Distinct();
-            var temp = allWorksByTheseArtists.AsEnumerable()
-                .Join(musicDb.ArtistWorkList, w => w.Id, aw => aw.WorkId, (w, aw) => aw);
-            var works = temp.GroupBy(x => x.Work)
-                .Where(x => artistSet.Matches(x.Select(z => z.ArtistId)))
-                .Select(x => x.Key);
-            return works;
-        }
-        protected void PortPerformance(DirectoryInfo parentDirectory, Performance performance,
-            string performanceName, Func<Track, IEnumerable<Track>, string> GetTrackFileName,
-            Func<Performance, DirectoryInfo,(IEnumerable<string>, IEnumerable<string>)> validateMovementsMethod)
-        {
-            var performanceDirectory = GetDirectoryInfo(Path.Combine(parentDirectory.FullName, GetPathSafeName( performanceName)));
-            var (_, invalidfiles) = validateMovementsMethod(performance, performanceDirectory);// ValidateMovementsUsingCompressedNames(performance, performanceDirectory);
+            string performanceName = folderNamer.GetPerformanceName(tuple, allPerformances);
+            var performanceDirectory = GetDirectoryInfo(Path.Combine(parentDirectory.FullName, GetPathSafeName(performanceName)));
+            var (_, invalidfiles) = folderNamer.ValidateMovements(tuple.Performance, performanceDirectory);// ValidateMovementsUsingCompressedNames(performance, performanceDirectory);
             foreach (var filename in invalidfiles)
             {
                 var fi = new FileInfo(filename);
@@ -336,187 +289,25 @@ namespace Fastnet.Apollo.Agents
                 fi.Delete();
                 log.Information($"{fi.FullName} deleted");
             }
-            var trackList = performance.Movements.ToArray();
-            foreach (var movement in performance.Movements)
+            var trackList = tuple.Performance.Movements.ToArray();
+            foreach (var movement in trackList)
             {
                 //var filename = GetCompressedName(movement, trackList);
-                var filename = GetTrackFileName(movement, trackList);
+                var filename = folderNamer.GetTrackFileName(movement, trackList);
                 CopyTrack(movement, performanceDirectory, filename);
             }
         }
-        //protected abstract void ProcessArtistSet(ArtistSet artistSet, IEnumerable<Work> works, DirectoryInfo fullNamesDirectory, DirectoryInfo compressedNamesDirectory);
-        private void RemoveInvalidArtistDirectories(IEnumerable<ArtistSet> artistSetList)
-        {
-            //var artistSetList = musicDb.Works
-            //    .Where(w => w.StyleId == this.musicStyle)
-            //    .Where(w => !w.Artists.Any(a => a.Type == ArtistType.Various))
-            //    .Select(x => new ArtistSet(x.Artists));
-            var path = Path.Combine(this.portabilityConfiguration.FullNamesRoot, this.musicStyle.ToDescription());
-            if (Directory.Exists(path))
-            {
-                var artistPathNames = Directory.EnumerateDirectories(path).Select(p => Path.GetFileName(p));
-                foreach (var ap in artistPathNames)
-                {
-                    log.Trace($"checking path {ap}");
-
-                    if (musicDb.Artists.SingleOrDefault(x => x.Name.ToLower() == ap.ToLower()) == null)
-                    {
-                        var fp = new DirectoryInfo(Path.Combine(path, ap));
-                        RemoveInvalidFolders(new DirectoryInfo[] { fp });
-                        //log.Information($"{fp} deleted");
-                    }
-                }
-            }
-            path = Path.Combine(this.portabilityConfiguration.CompressedNamesRoot, this.musicStyle.ToDescription());
-            if (Directory.Exists(path))
-            {
-                var artistPathNames = Directory.EnumerateDirectories(path).Select(p => Path.GetFileName(p));
-                foreach (var ap in artistPathNames)
-                {
-                    log.Trace($"checking path {ap}");
-                    if (musicDb.Artists.SingleOrDefault(x => x.CompressedName.ToLower() == ap.ToLower()) == null)
-                    {
-                        var fp = new DirectoryInfo(Path.Combine(path, ap));
-                        RemoveInvalidFolders(new DirectoryInfo[] { fp });
-                        //log.Information($"{fp} deleted");
-                    }
-                }
-            }
-        }
-        protected void RemoveInvalidArtistDirectoriesOld()
-        {
-            var path = Path.Combine(this.portabilityConfiguration.CompressedNamesRoot, this.musicStyle.ToDescription());
-            if (Directory.Exists(path))
-            {
-                var artistPathNames = Directory.EnumerateDirectories(path).Select(p => Path.GetFileName(p));
-                foreach (var ap in artistPathNames)
-                {
-                    log.Trace($"checking path {ap}");
-                    if (musicDb.Artists.SingleOrDefault(x => x.CompressedName.ToLower() == ap.ToLower()) == null)
-                    {
-                        var fp = new DirectoryInfo(Path.Combine(path, ap));
-                        RemoveInvalidFolders(new DirectoryInfo[] { fp });
-                        //log.Information($"{fp} deleted");
-                    }
-                }
-            }
-        }
-        protected void RemoveInvalidFolders(IEnumerable<DirectoryInfo> invalidFolders)
-        {
-            foreach (var di in invalidFolders)
-            {
-                di.Clear();
-                di.Delete(true);
-                log.Information($"{di.FullName} deleted");
-            }
-        }
         protected abstract Task StartAsync(IEnumerable<ArtistSet> artistSets);
-
-
         #endregion Protected Methods
 
         #region Private Methods
-        protected (IEnumerable<DirectoryInfo> validFolders, IEnumerable<DirectoryInfo> invalidFolders) ValidateCompressedNamePerformanceFolders(/*Artist artist,*/
-            DirectoryInfo compressedNameFolder, IEnumerable<PerformanceTuple> performanceTuples)
-        {
-            var existingFolders = compressedNameFolder.EnumerateDirectories();
-            var fullNames = performanceTuples
-                .Where(x => !string.IsNullOrWhiteSpace(x.Performance.CompressedName))
-                .Select(x => x.Performance.CompressedName);
-            var validFolders = existingFolders.Where(f => fullNames.Contains(f.Name, StringComparer.InvariantCultureIgnoreCase));
-            var invalidFolders = existingFolders.Except(validFolders, new DirectoryInfoComparer());
-            foreach (var di in invalidFolders)
-            {
-                log.Information($"invalid folder {di.Name}");
-            }
-            return (validFolders, invalidFolders);
-        }
-        protected (IEnumerable<DirectoryInfo> validFolders, IEnumerable<DirectoryInfo> invalidFolders) ValidateFullNamePerformanceFolders(/*Artist artist,*/
-            DirectoryInfo fullNameDirectory, IEnumerable<PerformanceTuple> performanceTuples)
-        {
-            var existingFolders = fullNameDirectory.EnumerateDirectories();
-            var fullNames = performanceTuples.Select(x => GetPathSafeName(x.Name));
-            var validFolders = existingFolders.Where(f => fullNames.Contains(f.Name, StringComparer.InvariantCultureIgnoreCase));
-            var invalidFolders = existingFolders.Except(validFolders, new DirectoryInfoComparer());
-            foreach (var di in invalidFolders)
-            {
-                log.Information($"invalid folder {di.Name}");
-            }
-            return (validFolders, invalidFolders);
-        }
-        protected (IEnumerable<string> validFiles, IEnumerable<string> invalidFiles) ValidateMovementsUsingCompressedNames(Performance performance, DirectoryInfo performanceDirectory)
-        {
-            var existingFiles = performanceDirectory.EnumerateFiles();//.Select(fi => Path.GetFileNameWithoutExtension(fi.Name));
-            var compressedNames = performance.Movements // work.Tracks
-                .Where(w => !string.IsNullOrWhiteSpace(w.CompressedName))
-                .Select(x => x.CompressedName);
-            var validFiles = existingFiles.Where(f => compressedNames.Contains(Path.GetFileNameWithoutExtension(f.Name), StringComparer.InvariantCultureIgnoreCase));
-            var invalidFiles = existingFiles.Except(validFiles, new FileInfoComparer());//, StringComparer.InvariantCultureIgnoreCase);
-            foreach (var file in validFiles)
-            {
-                var movement = performance.Movements.Single(x => x.CompressedName == Path.GetFileNameWithoutExtension(file.Name));
-                log.Trace($"Work {movement.Work.Name}, valid file {file} ({movement.Title})");
-            }
-            foreach (var file in invalidFiles)
-            {
-                log.Information($"{performanceDirectory.FullName}, {performance.GetAllPerformersCSV()}, invalid file {file}");
-            }
-            return (validFiles.Select(x => x.FullName), invalidFiles.Select(x => x.FullName));
-        }
-        protected (IEnumerable<string> validFiles, IEnumerable<string> invalidFiles) ValidateMovementsUsingFullNames(Performance performance, DirectoryInfo performanceDirectory)
-        {
-            var existingFiles = performanceDirectory.EnumerateFiles();//.Select(fi => Path.GetFileNameWithoutExtension(fi.Name));
-            var names = performance.Movements // work.Tracks
-                                                        //.Where(w => !string.IsNullOrWhiteSpace(w.CompressedName))
-                .Select(x => $"{x.Number:#00} {GetPathSafeName(x.Title)}");
-            var validFiles = existingFiles.Where(f => names.Contains(Path.GetFileNameWithoutExtension(f.Name), StringComparer.InvariantCultureIgnoreCase));
-            var invalidFiles = existingFiles.Except(validFiles, new FileInfoComparer());//, StringComparer.InvariantCultureIgnoreCase);
-            //foreach (var file in validFiles)
-            //{
-            //    var movement = performance.Movements.Single(x => x.Title == Path.GetFileNameWithoutExtension(file.Name));
-            //    log.Trace($"Work {movement.Work.Name}, valid file {file} ({movement.Title})");
-            //}
-            //foreach (var file in invalidFiles)
-            //{
-            //    log.Information($"{performanceDirectory.FullName}, {performance.GetAllPerformersCSV()}, invalid file {file}");
-            //}
-            return (validFiles.Select(x => x.FullName), invalidFiles.Select(x => x.FullName));
-        }
-        private void ClearModifiedDirectories(IEnumerable<ArtistSet> artistSets)
-        {
-            foreach (var artistSet in artistSets.OrderBy(x => x.GetNames()))
-            {
-                log.Debug($"processing artist {artistSet.GetNames()}");
-                (var fullNamesDirectory, var compressedNamesDirectory) = GetArtistDirectories(artistSet);
-                if (fullNamesDirectory.Exists)
-                {
-                    var lastModified = artistSet.Artists.Max(x => x.LastModified.UtcDateTime);
-                    if (fullNamesDirectory.LastWriteTimeUtc <= lastModified)
-                    {
-                        log.Debug($"{artistSet.GetNames()} db record(s) modified since last write to porting folder");
-                        fullNamesDirectory.Clear();
-                        log.Information($"{artistSet.GetNames()} previous full names porting folder(s) cleared");
-                    }
 
-                }
-                if (compressedNamesDirectory.Exists)
-                {
-                    var lastModified = artistSet.Artists.Max(x => x.LastModified.UtcDateTime);
-                    if (compressedNamesDirectory.LastWriteTimeUtc <= lastModified)
-                    {
-                        log.Debug($"{artistSet.GetNames()} db record(s) modified since last write to porting folder");
-                        compressedNamesDirectory.Clear();
-                        log.Information($"{artistSet.GetNames()} previous compressed names porting folder(s) cleared");
-                    }
-
-                }
-            }
-        }
         private bool CompareTags(Track src, string destination)
         {
             static bool comparePictures(IPicture[] src, IPicture[] dest)
             {
                 if (src == null && dest == null) return true;
+                if (dest == null && src != null && src.Length == 0) return true;
                 if (src == null || dest == null) return false;
                 if (src.Length == 0 && dest.Length == 0) return true;
                 if (src.Length == 0 || dest.Length == 0) return false;
@@ -599,9 +390,6 @@ namespace Fastnet.Apollo.Agents
         }
         private void CopyMp3(MusicFile mf, DirectoryInfo dir, string musicFileName)
         {
-
-            //var baseFileName = mf.File.Substring(mf.DiskRoot.Length + 1);
-            //var relativeNameWithoutExtension = Path.Combine(Path.GetDirectoryName(baseFileName), Path.GetFileNameWithoutExtension(baseFileName));
             var mp3File = mf.File;
             var targetFile = Path.Combine(dir.FullName, $"{musicFileName}.mp3");
             CopyFile(mf.Track, mp3File, targetFile);
@@ -612,7 +400,6 @@ namespace Fastnet.Apollo.Agents
             var sourceRoot = mf.DiskRoot;
             var baseFileName = mf.File.Substring(mf.DiskRoot.Length + 1);
             var relativeNameWithoutExtension = Path.Combine(Path.GetDirectoryName(baseFileName), Path.GetFileNameWithoutExtension(baseFileName));
-            //var vbrFile = Path.Combine(root.TargetRoot, relativeNameWithoutExtension + ".mp3");
             var vbrFile = Path.Combine(generatedSource.DiskRoot, relativeNameWithoutExtension + ".mp3");
             var targetFile = Path.Combine(dir.FullName, $"{musicFileName}.mp3");
             if (System.IO.File.Exists(vbrFile))
@@ -621,84 +408,16 @@ namespace Fastnet.Apollo.Agents
             }
             else
             {
-                //log.Warning($"{vbrFile} not found");
+                log.Warning($"{vbrFile} not found");
             }
         }
-        private DirectoryInfo GetArtistDirectory(Artist artist)
-        {
-            try
-            {
-                var artistName = GetCompressedName(artist);
-                var artistPath = Path.Combine(this.portabilityConfiguration.CompressedNamesRoot, this.musicStyle.ToDescription(), artistName);
-                return GetDirectoryInfo(artistPath);
-            }
-            catch (Exception)
-            {
-                Debugger.Break();
-                throw;
-            }
-        }
+
         #endregion Private Methods
     }
 
-    internal class CopiedTags
-    {
-        #region Public Properties
-
-        public string Album { get; set; }
-        public string[] Genres { get; set; }
-        public string[] Performers { get; set; }
-        public Picture[] Pictures { get; set; }
-        public string Title { get; set; }
-        public uint Track { get; set; }
-
-        #endregion Public Properties
-
-        #region Public Methods
-
-        public void WriteTags(string targetFile)
-        {
-            var file = Music.TagLib.File.Create(targetFile);
-            file.Tag.Clear();
-            file.Tag.Performers = Performers;// new string[] { track.Work.Artist.Name };
-            file.Tag.Album = Album; // track.Performance.Composition.Name;
-            file.Tag.Track = Track;// (uint)track.Number;
-            file.Tag.Title = Title;// track.Title;
-            file.Tag.Pictures = Pictures;// new[] { new Picture(track.Work.CoverData) };
-            file.Tag.Genres = Genres;// new string[] { this.musicStyle.ToDescription() };
-            file.Save();
-        }
-
-        #endregion Public Methods
-    }
-    internal class DirectoryInfoComparer : IEqualityComparer<DirectoryInfo>
-    {
-        #region Public Methods
-
-        public bool Equals(DirectoryInfo x, DirectoryInfo y)
-        {
-            return x.FullName.Equals(y.FullName);
-        }
-        public int GetHashCode(DirectoryInfo obj)
-        {
-            return obj.FullName.GetHashCode();
-        }
-
-        #endregion Public Methods
-    }
-    internal class FileInfoComparer : IEqualityComparer<FileInfo>
-    {
-        #region Public Methods
-
-        public bool Equals(FileInfo x, FileInfo y)
-        {
-            return x.FullName.Equals(y.FullName);
-        }
-        public int GetHashCode(FileInfo obj)
-        {
-            return obj.FullName.GetHashCode();
-        }
-
-        #endregion Public Methods
-    }
+    //public enum NameStyle
+    //{
+    //    Full,
+    //    Compressed
+    //}
 }
