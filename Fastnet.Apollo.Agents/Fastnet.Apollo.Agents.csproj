@@ -6,10 +6,11 @@
     <Authors>Asim Shah</Authors>
     <Product>Fastnet Agents</Product>
     <AssemblyVersion>2.$([System.DateTime]::Now.ToString('yyyy')).$([System.DateTime]::Now.ToString('Mdd')).$([System.DateTime]::Now.ToString('HHmm'))</AssemblyVersion>
+    <UserSecretsId>b82c143e-0ec4-4b44-978a-3ec9cce65284</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Fastnet.Core.Web" Version="2.283.866" />
+    <PackageReference Include="Fastnet.Core.Web" Version="2.311.734" />
     <PackageReference Include="Fastnet.Music.Data" Version="2.258.1000" />
     <PackageReference Include="Fastnet.Music.Messages" Version="2.246.641" />
     <PackageReference Include="Fastnet.Music.Taglib" Version="2.151.1274" />

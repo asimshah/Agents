@@ -91,7 +91,7 @@ namespace Fastnet.Apollo.Agents
                     .FirstOrDefault();
                 if (mp3File == null)
                 {
-                    log.Warning($"No supported encoding found for artist {track.Work.Artist.Name}, album {track.Work.Name} track {track.Title}");
+                    log.Warning($"No supported encoding found for artist {track.Work.GetArtistNames()}, album {track.Work.Name} track {track.Title}");
                 }
                 else
                 {

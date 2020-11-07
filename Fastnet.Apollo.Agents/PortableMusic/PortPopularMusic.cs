@@ -43,7 +43,8 @@ namespace Fastnet.Apollo.Agents
         {
             var ct = new CopiedTags
             {
-                Performers = new string[] { track.Work.Artist.Name },
+                //Performers = new string[] { track.Work.Artist.Name },
+                Performers = track.Work.Artists.Select(x => x.Name).ToArray(),
                 Track = (uint)track.Number,
                 Title = track.Title,
                 Pictures = new[] { new Picture(track.Work.Cover.Data) },
@@ -67,7 +68,8 @@ namespace Fastnet.Apollo.Agents
         {
             if (string.IsNullOrWhiteSpace(work.CompressedName))
             {
-                var existingNames = work.Artist.Works
+                var works = work.Artists.SelectMany(x => x.Works).Distinct();
+                var existingNames = works // work.Artist.Works
                     .Where(x => !string.IsNullOrWhiteSpace(x.CompressedName))
                     .Select(x => x.CompressedName);
                 work.CompressedName = GetNextUniqueName("A", existingNames);

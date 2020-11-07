@@ -2,6 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Net;
+using System.Net.NetworkInformation;
 using System.Reflection;
 using System.Threading.Tasks;
 using Fastnet.Core;
@@ -12,6 +14,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 namespace Fastnet.Apollo.Agents
 {
@@ -23,7 +26,6 @@ namespace Fastnet.Apollo.Agents
             Configuration = configuration;
             this.log = logger;
             var version = typeof(Startup).Assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>().InformationalVersion;
-            //Debug.WriteLine($"Agents {version.ToString()} site started");
             log.Information($"Agents {version.ToString()} site started");
         }
 
@@ -34,9 +36,11 @@ namespace Fastnet.Apollo.Agents
         {
             services.AddSignalR(/*(x) => x.EnableDetailedErrors = true*/);
             services.AddOptions();
+
             services.Configure<MessengerOptions>(Configuration.GetSection("MessengerOptions"));
             services.Configure<AgentConfiguration>(Configuration.GetSection("AgentConfiguration"));
             services.Configure<SchedulerOptions>(Configuration.GetSection("SchedulerOptions"));
+            services.ConfigureCoreServices();
             services.AddAgentTasks(Configuration);
 
             // .net core 3.0's built-in json (System.Text.Json) is missing features as of Nov 2019:
@@ -74,4 +78,5 @@ namespace Fastnet.Apollo.Agents
             });
         }
     }
+
 }
