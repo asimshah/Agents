@@ -122,8 +122,11 @@ namespace Fastnet.Apollo.Agents
                     this.hcs = HubConnectingState.Connecting;
                     log.Information($"music server hub connecting ...");
                     await Task.Delay(delayMilliSeconds);
+                    //this.hubConnection = new HubConnectionBuilder()
+                    //    .WithUrl($"{musicServerUrl}/playhub")
+                    //    .Build();
                     this.hubConnection = new HubConnectionBuilder()
-                        .WithUrl($"{musicServerUrl}/playhub")
+                        .WithUrl($"{musicServerUrl}/messagehub")
                         .Build();
                     log.Information($"music server url is {musicServerUrl}");
                     this.hubConnection.Closed += async (error) =>

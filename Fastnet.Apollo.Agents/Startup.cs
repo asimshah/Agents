@@ -25,8 +25,22 @@ namespace Fastnet.Apollo.Agents
         {
             Configuration = configuration;
             this.log = logger;
-            var version = typeof(Startup).Assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>().InformationalVersion;
-            log.Information($"Agents {version.ToString()} site started");
+            //var version = typeof(Startup).Assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>().InformationalVersion;
+            //log.Information($"Agents {version.ToString()} site started");
+            var name = Process.GetCurrentProcess().ProcessName;
+            var siteVersion = GetSiteVersion();
+            var versions = System.Reflection.Assembly.GetExecutingAssembly().GetVersions();
+            log.Information($"Agents {siteVersion} site started ({name}), using versions:");
+            foreach (var item in versions.OrderByDescending(x => x.DateTime))
+            {
+                log.Information($"{item.Name}, {item.DateTime.ToDefaultWithTime()}, [{item.Version}, {item.PackageVersion}]");
+            }
+        }
+        // move this to Fastnet.Core
+        private string GetSiteVersion()
+        {
+            var assemblyLocation = System.Reflection.Assembly.GetExecutingAssembly().Location;
+            return System.Diagnostics.FileVersionInfo.GetVersionInfo(assemblyLocation).ProductVersion;
         }
 
         public IConfiguration Configuration { get; }
