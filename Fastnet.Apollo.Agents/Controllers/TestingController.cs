@@ -34,6 +34,12 @@ namespace Fastnet.Apollo.Agents
             await schedulerService.ExecuteNow<BackupTask>();
             return SuccessResult();
         }
+        [HttpGet("webbackup/start")]
+        public async Task<IActionResult> StartWbDbBackup()
+        {
+            await schedulerService.ExecuteNow<WebDbBackupTask>();
+            return SuccessResult();
+        }
         [HttpGet("options/1")]
         public async Task<IActionResult> Options1()
         {

@@ -3,8 +3,98 @@
 @{
     ViewData["Title"] = "Home page";
 }
+<div class="status-page-title">
+    <span>Status of Agents on </span>
+    <span>
+        @Html.DisplayFor(item => Model.Machine),
+    </span>
+    <span>@Html.DisplayFor(item => Model.Now)</span>
+</div>
+<div>
+    <table class="agents-table">
+        <tr>
+            <th>Agent</th>
+            <th>Target(s)</th>
+            <th>Next Run</th>
+            <th>Schedule</th>
+        </tr>
+        @foreach (var ar in Model.AgentRuntimes)
+        {
+            <tr>
+                <td class="agent-name">                  
+                    <a class="nav-link text-dark" asp-area="" asp-page="/@ar.Name">@ar.Name</a>
+                </td>
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://docs.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+                <td>
+                    @switch (ar.Name)
+                    {
+                        case AgentName.FolderBackup:
+
+                            var fba = ar as FolderBackupAgent;
+                            @foreach (var def in fba.Definitions)
+                            {
+                                <div class="backup-definition">
+                                    <span>@def.Source</span>
+                                    <span>=></span>
+                                    <span>@def.Destination</span>
+                                </div>
+                            }
+                            break;
+                        case AgentName.PortableMusicLibrary:
+                            var pma = ar as PortableMusicAgent;
+                            <div class="portable-library-root">
+                                <span>@pma.PortableLibraryRoot</span>
+                            </div>
+                            break;
+                        case AgentName.WebDatabaseBackup:
+                            var wdba = ar as WebDatabaseBackupAgent;
+                            <div class="database-backup-folders">
+                                <div>Backup to: @wdba.BackupFolder,</div>
+                                <div>Working folder: @wdba.WorkingFolder</div>
+                            </div>                            
+                            break;
+                    }
+                </td>
+                @if (ar.Type == AgentType.Scheduled)
+                {
+                    @if (ar.IsRunning)
+                    {
+                        <td stye="font-style: italic">Running</td>
+                    }
+                    else
+                    {
+                        <td class="next-run-time">@Html.DisplayFor(item => ar.NextRunTime)</td>
+                    }
+                    <td class="schedule-description">@Html.DisplayFor(item => ar.ScheduleDescription)</td>
+                }
+                else
+                {
+                    <td></td>
+                    <td></td>
+                }
+            </tr>
+            if (ar.Name == AgentName.WebDatabaseBackup)
+            {
+                <tr>
+                    <td></td>
+                    <td colspan="7">                                                
+                        @foreach (var site in (ar as WebDatabaseBackupAgent).Sites)
+                        {
+                        <div class="web-site">
+                            <span>Site: @site.Name,</span>
+                            <span>Port: @site.Port,</span>
+                            <span>Path: @site.PhysicalPath</span>
+
+                        </div>
+                        }
+                    </td>
+                </tr>
+            }
+            <tr>
+                <td>
+                </td>
+                <td colspan=7 class="agent-description"><div>@Html.DisplayFor(item => ar.Description)</div></td>
+            </tr>
+        }
+    </table>
 </div>

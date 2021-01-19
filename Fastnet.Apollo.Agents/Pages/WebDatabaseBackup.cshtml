@@ -1,0 +1,49 @@
+﻿@page
+@model WebDbBackupModel
+@{
+    ViewData["Title"] = "Web site Database backups";
+}
+
+@{
+    var agent = Model.Agent as WebDatabaseBackupAgent;
+}
+
+<div class="web-db-backup">
+    <div class="banner">
+        <div class="title">
+            <div>@Environment.MachineName web site database backups</div>
+        </div>
+        <table class="details">
+            <tr>
+                <td class="label">Backup folder:</td>
+                <td class="folder">@agent.BackupFolder</td>
+                <td class="run-now" rowspan="7">
+                    <form method="post"><button class="btn btn-info">Run now ...</button>
+                        </form></td>
+            </tr>
+            <tr>
+                <td class="label">Working folder:</td>
+                <td class="folder">@agent.WorkingFolder</td>
+            </tr>
+        </table>
+    </div>
+    <div class="web-sites">
+        @foreach (var site in agent.Sites)
+        {
+            <div class="site-name">Web site name: @site.Name</div>
+            if (site.Zipfiles.Count() == 0)
+            {
+                <div class="alert-message">No backup files found</div>
+            }
+            else
+            {
+                foreach (var fn in site.Zipfiles)
+                {
+                    <div class="zip-file-name">@fn</div>
+                }
+            }
+        }
+    </div>
+
+</div>
+

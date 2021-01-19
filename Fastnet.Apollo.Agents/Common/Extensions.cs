@@ -1,4 +1,5 @@
-﻿using Fastnet.Core;
+﻿using Fastnet.Apollo.Agents.Services;
+using Fastnet.Core;
 using Fastnet.Core.Web;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -15,6 +16,7 @@ namespace Fastnet.Apollo.Agents
         {
             var agentConfiguration = new AgentConfiguration();
             configuration.GetSection("AgentConfiguration").Bind(agentConfiguration);
+            services.AddSingleton<AgentService>();
             services.AddSingleton<Messenger>();
             services.AddSingleton<MusicServerListener>();
             foreach (var agent in agentConfiguration.Agents)
@@ -36,6 +38,10 @@ namespace Fastnet.Apollo.Agents
                         case AgentName.FolderBackup:
                             services.Configure<BackupConfiguration>(configuration.GetSection("BackupConfiguration"));
                             services.AddSingleton<ScheduledTask, BackupTask>();
+                            break;
+                        case AgentName.WebDatabaseBackup:
+                            services.Configure<WebDbBackupConfiguration>(configuration.GetSection("WebDbBackupConfiguration"));
+                            services.AddSingleton<ScheduledTask, WebDbBackupTask>();
                             break;
                         //case AgentName.ContactSynchroniser:
                         //    services.Configure<ContactSynchroniserConfiguration>(configuration.GetSection("ContactSynchroniserConfiguration"));

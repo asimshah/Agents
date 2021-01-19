@@ -15,12 +15,13 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Fastnet.Core.Web" Version="2.313.1031" />
-    <PackageReference Include="Fastnet.Music.Data" Version="2.317.966" />
-    <PackageReference Include="Fastnet.Music.Messages" Version="2.317.968" />
+    <PackageReference Include="Fastnet.Core.Web" Version="2.383.343" />
+    <PackageReference Include="Fastnet.Music.Data" Version="2.371.526" />
+    <PackageReference Include="Fastnet.Music.Messages" Version="2.371.526" />
     <PackageReference Include="Fastnet.Music.Taglib" Version="2.313.963" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="3.1.1" />
     <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="3.1.1" />
+    <PackageReference Include="Microsoft.Web.Administration" Version="11.1.0" />
     <PackageReference Include="NAudio" Version="1.10.0" />
   </ItemGroup>
 
