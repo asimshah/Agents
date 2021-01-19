@@ -24,6 +24,7 @@ namespace Fastnet.Apollo.Agents
         public string ScheduleDescription => Type == AgentType.Scheduled ? taskWrapper?.GetScheduleDescription() ?? string.Empty : string.Empty;
         [DisplayFormat(DataFormatString = @"{0:ddMMMyyyy HH:mm}")]
         public DateTime NextRunTime => Type == AgentType.Scheduled ? taskWrapper?.GetNextRunTime() ?? DateTime.MinValue : DateTime.MinValue;
+        public bool IsTaskSet => taskWrapper != null;
 
         public AgentRuntime()
         {

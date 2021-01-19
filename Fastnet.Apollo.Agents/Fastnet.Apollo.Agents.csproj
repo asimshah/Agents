@@ -15,7 +15,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Fastnet.Core.Web" Version="2.383.343" />
+    <PackageReference Include="Fastnet.Core.Web" Version="2.384.850" />
     <PackageReference Include="Fastnet.Music.Data" Version="2.371.526" />
     <PackageReference Include="Fastnet.Music.Messages" Version="2.371.526" />
     <PackageReference Include="Fastnet.Music.Taglib" Version="2.313.963" />

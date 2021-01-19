@@ -12,13 +12,13 @@ namespace Fastnet.Apollo.Agents
 {
     public static class Extensions
     {
+        private static bool musicServerListenerEnabled = false;
+        private static bool messengerEnabled = false;
         public static IServiceCollection AddAgentTasks(this IServiceCollection services, IConfiguration configuration/*, IHostingEnvironment environment*/)
         {
             var agentConfiguration = new AgentConfiguration();
             configuration.GetSection("AgentConfiguration").Bind(agentConfiguration);
             services.AddSingleton<AgentService>();
-            services.AddSingleton<Messenger>();
-            services.AddSingleton<MusicServerListener>();
             foreach (var agent in agentConfiguration.Agents)
             {
                 if (agent.Enabled)
@@ -26,10 +26,14 @@ namespace Fastnet.Apollo.Agents
                     switch (agent.Name)
                     {
                         case AgentName.PortableMusicLibrary:
+                            EnableMessenger(services);
+                            EnableMusicServerListener(services);
                             services.Configure<PortabilityConfiguration>(configuration.GetSection("PortabilityConfiguration"));
                             services.AddSingleton<ScheduledTask, MusicPortingTask>();
                             break;
                         case AgentName.MusicPlayer:
+                            EnableMessenger(services);
+                            EnableMusicServerListener(services);
                             services.Configure<MusicPlayerOptions>(configuration.GetSection("MusicPlayerOptions"));
                             services.AddService<MusicPlayer>();
                             break;
@@ -58,6 +62,22 @@ namespace Fastnet.Apollo.Agents
             }
             services.AddScheduler(configuration);
             return services;
+        }
+        private static void EnableMessenger(IServiceCollection services)
+        {
+            if(!messengerEnabled)
+            {
+                services.AddSingleton<Messenger>();
+                messengerEnabled = true;
+            }
+        }
+        private static void EnableMusicServerListener(IServiceCollection services)
+        {
+            if (!musicServerListenerEnabled)
+            {
+                services.AddSingleton<MusicServerListener>();
+                musicServerListenerEnabled = true;
+            }
         }
     }
 }

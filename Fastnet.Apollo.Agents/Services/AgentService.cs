@@ -1,26 +1,28 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using Fastnet.Core;
+using Fastnet.Core.Web;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Web.Administration;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using Microsoft.Web.Administration;
-using System.Threading.Tasks;
-using Fastnet.Core;
-using Fastnet.Core.Web;
 
 namespace Fastnet.Apollo.Agents.Services
 {
     public class AgentService
     {
+        private readonly IServiceProvider service;
         private readonly ILogger log;
         private readonly IOptionsMonitor<AgentConfiguration> configOptions;
         private readonly IOptionsMonitor<BackupConfiguration> backupConfig;
         private readonly IOptionsMonitor<PortabilityConfiguration> portabilityConfig;
         private readonly IOptionsMonitor<WebDbBackupConfiguration> webDbBackupConfig;
         private readonly SchedulerService schedulerService;
+        private readonly IServiceProvider serviceProvider;
         public AgentService(
+            IServiceProvider serviceProvider,
             SchedulerService schedulerService,
             IOptionsMonitor<AgentConfiguration> configOptions,
             IOptionsMonitor<BackupConfiguration> backupConfig,
@@ -28,6 +30,7 @@ namespace Fastnet.Apollo.Agents.Services
             IOptionsMonitor<WebDbBackupConfiguration> webDbBackupConfiguration,
             ILogger<AgentService> logger)
         {
+            this.serviceProvider = serviceProvider;
             this.schedulerService = schedulerService;
             this.configOptions = configOptions;
             this.backupConfig = backupConfig;
@@ -48,25 +51,37 @@ namespace Fastnet.Apollo.Agents.Services
                             if (backupConfig.CurrentValue.Definitions.Length > 0)
                             {                               
                                 var fb = Create<FolderBackupAgent>(item);
-                                fb.Definitions = backupConfig.CurrentValue.Definitions.ToArray();
-                                list.Add(fb);
+                                if (IsAssociatedScheduledTaskOrServiceAvailable(fb))
+                                {
+                                    fb.Definitions = backupConfig.CurrentValue.Definitions.ToArray();
+                                    list.Add(fb);
+                                }
                             }
                             break;
                         case AgentName.MusicPlayer:
                             var mp = Create<MusicPlayerAgent>(item);// new MusicPlayerAgent(item);
-                            list.Add(mp);
+                            if (IsAssociatedScheduledTaskOrServiceAvailable(mp))
+                            {
+                                list.Add(mp);
+                            }
                             break;
                         case AgentName.PortableMusicLibrary:
-                            var pma = Create<PortableMusicAgent>(item);// new PortableMusicAgent(item);
-                            pma.PortableLibraryRoot = portabilityConfig.CurrentValue.PortableLibraryRoot;
-                            list.Add(pma);
+                            var pma = Create<PortableMusicAgent>(item);
+                            if (IsAssociatedScheduledTaskOrServiceAvailable(pma))
+                            {
+                                pma.PortableLibraryRoot = portabilityConfig.CurrentValue.PortableLibraryRoot;
+                                list.Add(pma);
+                            }
                             break;
                         case AgentName.WebDatabaseBackup:
                             var wdba = Create<WebDatabaseBackupAgent>(item);
-                            wdba.BackupFolder = webDbBackupConfig.CurrentValue.BackupFolder;
-                            wdba.WorkingFolder = webDbBackupConfig.CurrentValue.WorkingFolder;
-                            ScanLocalIIS(wdba);
-                            list.Add(wdba);
+                            if (IsAssociatedScheduledTaskOrServiceAvailable(wdba))
+                            {
+                                wdba.BackupFolder = webDbBackupConfig.CurrentValue.BackupFolder;
+                                wdba.WorkingFolder = webDbBackupConfig.CurrentValue.WorkingFolder;
+                                ScanLocalIIS(wdba);
+                                list.Add(wdba);
+                            }
                             break;
                         default:
                             break;
@@ -104,12 +119,32 @@ namespace Fastnet.Apollo.Agents.Services
                         }
                         else
                         {
-                            log.Information($"Site {site.Name} physical path {physicalPath} does not have a data folder");
+                            log.Trace($"Site {site.Name} physical path {physicalPath} does not have a data folder");
                         }
                     }
                     //Debug.WriteLine($"Site {site.Name} port {binding.EndPoint.Port}");
                 }
             }
+        }
+        private bool IsAssociatedScheduledTaskOrServiceAvailable(AgentRuntime ar)
+        {
+            var result = false;
+            switch (ar.Type)
+            {
+                case AgentType.Scheduled:
+                    result = ar.IsTaskSet;
+                    break;
+                case AgentType.Service:
+                    switch(ar.Name)
+                    {
+                        case AgentName.MusicPlayer:
+                            var player = this.serviceProvider.GetService<MusicPlayer>();
+                            result = player != null;
+                            break;
+                    }
+                    break;
+            }
+            return result;
         }
         private T Create<T>(Agent agent) where T : AgentRuntime, new()
         {
