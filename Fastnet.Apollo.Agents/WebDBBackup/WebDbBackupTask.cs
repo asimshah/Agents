@@ -45,6 +45,10 @@ namespace Fastnet.Apollo.Agents
                 log.Information($"{file} copied to {to}");
             }
             var source = Path.Combine(site.PhysicalPath, "Data");
+            if(!Directory.Exists(source))
+            {
+                source = Path.Combine(site.PhysicalPath, "App_Data");
+            }
             var dest = Path.Combine(agent.WorkingFolder, site.Name);
             var wf = new DirectoryInfo(agent.WorkingFolder);
             if(!wf.Exists)

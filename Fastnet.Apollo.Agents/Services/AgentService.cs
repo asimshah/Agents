@@ -104,16 +104,17 @@ namespace Fastnet.Apollo.Agents.Services
                 //Debug.WriteLine($"site {site.Name}");
                 //site.Applications[0].VirtualDirectories[0].PhysicalPath
                 var app = site.Applications.First();
-                //log.Information($"site {site.Name} found {site.Bindings.Count()} bindings");
+                log.Trace($"site {site.Name} found {site.Bindings.Count()} bindings");
                 foreach (var binding in site.Bindings)
                 {
-                    //log.Information($"binding {binding.Host} port {binding.EndPoint.Port}");
+                    log.Trace($"binding {binding?.Host} port {binding?.EndPoint?.Port}");
                     var port = binding.EndPoint.Port;
-                    if (port != 80) // fastnet web sites never use port 80
-                    {
+                    //if (port != 80) // fastnet web sites never use port 80
+                    //{
                         var physicalPath = app.VirtualDirectories.First().PhysicalPath;
                         var databasePath = Path.Combine(physicalPath, "Data");
-                        if (Directory.Exists(databasePath))
+                        var old_databasePath = Path.Combine(physicalPath, "App_Data");
+                        if (Directory.Exists(databasePath) || Directory.Exists(old_databasePath))
                         {
                             wdba.AddSite(new WebSite { Name = site.Name, PhysicalPath = physicalPath, Port = port });
                         }
@@ -121,7 +122,7 @@ namespace Fastnet.Apollo.Agents.Services
                         {
                             log.Trace($"Site {site.Name} physical path {physicalPath} does not have a data folder");
                         }
-                    }
+                    //}
                     //Debug.WriteLine($"Site {site.Name} port {binding.EndPoint.Port}");
                 }
             }
