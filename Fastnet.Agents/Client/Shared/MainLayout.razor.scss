@@ -1,0 +1,53 @@
+﻿@import "../Common Styles/themes";
+
+.page {
+    /* default is for single column, two rows for small screens*/
+    display: grid;
+    grid-template-columns: auto 1fr;
+    background-size: cover;
+    height: 100%;
+    background-position: right top;
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+
+    &.home {
+        background-image: linear-gradient(290deg, transparent, rgba(0,0,0, 0.9)), url("images/as.jpg");
+    }
+
+    &.counter {
+    }
+}
+
+.main {
+    border-left: 1px solid var(--primary-foreground-colour);
+    padding-left: 2rem;
+    padding-right: 1.5rem;
+}
+
+.sidebar {
+    width: 250px;
+    margin-top: 2rem;
+    margin-bottom: 2rem;
+    background-color: var(--primary-background-colour);
+    overflow-y: auto;
+}
+
+
+
+@include for-ipads-and-smaller {
+    /*@media (min-width: 641px) {*/
+    .page {
+        grid-template-columns: auto;
+        grid-template-rows: auto 1fr;
+    }
+
+    .sidebar {
+        width: 100%;
+    }
+
+    .main {
+        border-left: none;
+        padding-left: 0;
+        padding-right: 0;
+    }
+}

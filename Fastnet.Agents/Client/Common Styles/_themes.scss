@@ -1,0 +1,219 @@
+﻿/*
+@import "material-design-color-palettes";*/
+
+$white: #ffffff;
+$black: #000000;
+
+@mixin control-label {
+    display: block;
+    color: var(--control-label-colour);
+    font-style: italic;
+    font-weight: 500;
+    margin-bottom: 0;
+}
+
+@mixin scrollable-table-container ($height: calc(100vh - 200px) ) {
+    height: $height;
+    overflow-y: auto;
+    overflow-x: hidden;
+
+    table {
+
+        thead {
+            ::deep th {
+                position: sticky;
+                top: 0;
+            }
+        }
+    }
+}
+
+%button-dimensions {
+    $font-size: 1rem;
+    font-family: inherit;
+    font-size: $font-size;
+/*    margin: 0.125rem;*/
+    display: inline-block;
+    font-weight: 400;
+    text-align: center;
+    vertical-align: middle;
+    user-select: none;
+    padding: 0.375rem 0.75rem;
+    font-size: 1rem;
+    line-height: 1.5;
+    border-radius: 0.25rem;
+}
+%button-style {
+    white-space: nowrap;
+    text-decoration: none;
+    outline: none;
+    border: var(--control-border);
+
+    &[disabled], &.disabled {
+        cursor: none;
+        pointer-events: none;
+        background-color: var(--control-disabled-colour);
+        background-color: var(--control-disabled-colour);
+    }
+}
+@mixin theme-buttons {
+    @mixin set-button($colour, $background, $hover) {
+        color: $colour;
+        background-color: $background;
+        border: none;
+        outline: none;
+
+        &:hover {
+            background-color: $hover;
+            color: $colour;
+        }
+
+        &:focus {
+            outline: none;
+            box-shadow: none;
+        }
+
+        &:active {
+            outline: none;
+/*            background-color: inherit;*/
+        }
+    }
+
+    .btn-primary, a.btn-primary {
+        @extend %button-dimensions;
+        @extend %button-style;
+        @include set-button(var(--button-primary-foreground-colour), var(--button-primary-background-colour), var(--button-primary-hover-colour));
+    }
+
+    .btn-secondary, a.btn-secondary {
+        @extend %button-dimensions;
+        @extend %button-style;
+        @include set-button(var(--button-secondary-foreground-colour), var(--button-secondary-background-colour), var(--button-secondary-hover-colour));
+    }
+
+    .btn-warning, a.btn-warning {
+        @extend %button-dimensions;
+        @extend %button-style;
+        @include set-button(var(--button-warning-foreground-colour), var(--button-warning-background-colour), var(--button-warning-hover-colour));
+    }
+
+    .btn-danger, a.btn-danger {
+        @extend %button-dimensions;
+        @extend %button-style;
+        @include set-button(var(--button-danger-foreground-colour), var(--button-danger-background-colour), var(--button-danger-hover-colour));
+    }
+
+    .btn-cancel, a.btn-cancel {
+        @extend %button-dimensions;
+        @extend %button-style;
+        @include set-button(var(--button-cancel-foreground-colour), var(--button-cancel-background-colour), var(--button-cancel-hover-colour));
+        border-style: solid;
+        border-width: 1px;
+        border-color: var(--button-cancel-foreground-colour);
+    }
+
+    .btn-slim {
+        line-height: 1.0;
+        font-size: 12px;
+        padding: 0.3rem 0.5rem;
+    }
+}
+@mixin styled-scrollbar-1 {
+    /* The emerging W3C standard
+   that is currently Firefox-only */
+    scrollbar-width: thin;
+    scrollbar-color: var(--scrollbar-colour);
+    /* Works on Chrome/Edge/Safari */
+    &::-webkit-scrollbar {
+        width: 12px;
+    }
+
+    &::-webkit-scrollbar-track {
+        /*        background: darken($secondary-background, 10%);*/
+        background: var(--scrollbar-track-colour);
+    }
+
+    &::-webkit-scrollbar-thumb {
+        background-color: var(--scrollbar-thumb-colour); // lighten($secondary-background, 10%);
+        border-radius: 20px;
+        border: 3px solid var(--scrollbar-border-thumb-colour);
+
+        &:hover {
+            background-color: var(--control-hover-colour);
+        }
+    }
+}
+@mixin menu-item-panel {
+    font-size: 0.9rem;
+    padding-bottom: 0.5rem;
+    padding-left: 1rem;
+    padding-right: 1rem;
+
+}
+@mixin menu-item {
+    background-color: var(--menu-item-background-colour);
+    color: var(--menu-item-foreground-colour);
+    border-radius: 4px;
+    line-height: 3rem;
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+
+    &.active {
+        color: var(--menu-item-active-foreground-colour);
+        background-color: var(--menu-item-active-background-colour);
+    }
+
+    &:hover {
+        color: var(--menu-item-active-foreground-colour);
+        background-color: var(--menu-item-active-background-colour);
+    }
+}
+
+@mixin for-phone-only {
+    @media (min-width: 320px) and (max-width: 479px) { @content }
+}
+@mixin for-landscape-phone-only {
+    @media (min-width: 480px) and (max-width: 767px) {
+        @content
+    }
+}
+@mixin for-ipads-only {
+    @media (min-width: 768px) and (max-width: 1023px) and (orientation: landscape) {
+        @content
+    }
+}
+@mixin for-portrait-ipads-only {
+    @media (min-width: 768px) and (max-width: 1023px) and (orientation: portrait) {
+        @content
+    }
+}
+@mixin for-laptops-only {
+    @media (min-width: 1024px) and (max-width: 1279px) {
+        @content
+    }
+}
+@mixin for-desktops-and-larger {
+    @media (min-width: 1280px) {
+        @content
+    }
+}
+@mixin for-ipads-and-larger {
+    @media (min-width: 768px) {
+        @content
+    }
+}
+@mixin for-laptops-and-larger {
+    @media (min-width: 1024px) {
+        @content
+    }
+}
+@mixin for-ipads-and-smaller {
+    @media (max-width: 1023px) {
+        @content
+    }
+}
+@mixin for-laptops-and-smaller {
+    @media (max-width: 1279px) {
+        @content
+    }
+}

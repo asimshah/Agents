@@ -1,0 +1,139 @@
+﻿@import "_themes";
+
+
+label {
+    @include control-label;
+}
+
+
+/* text-input is shared by TextBox, PasswordBox and EmailAddressBox */
+/* use input-box to */
+@mixin input-box {
+    color: var(--primary-foreground-colour);
+    background-color: transparent;
+    font: inherit;
+    font-weight: normal;
+    width: 100%;
+
+    .border-here {
+        border: var(--control-border);
+        border-radius: 0.25rem;
+    }
+
+    &:hover, &:focus {
+        border-color: var(--control-hover-colour);
+    }
+
+    &.invalid, &.field-invalid {
+        label {
+            color: var(--control-invalid-colour);
+        }
+
+        .border-here {
+            border-color: var(--control-invalid-colour);
+        }
+    }
+
+    &.disabled {
+        pointer-events: none;
+
+        label {
+            color: var(--control-disabled-colour);
+        }
+
+        $stripe-colour: #a8a8a8;
+
+        input {
+            background-image: linear-gradient(135deg, $stripe-colour 8.33%, transparent 8.33%, transparent 50%, $stripe-colour 50%, $stripe-colour 58.33%, transparent 58.33%, transparent 100%);
+            background-size: 8.49px 8.49px;
+        }
+    }
+
+    input {
+        box-sizing: border-box;
+        color: inherit;
+        caret-color: inherit;
+        padding: 0.25em;
+        background: transparent;
+        border: none;
+        border-radius: 0.25rem;
+        width: 100%;
+        min-height: 2rem;
+        font: inherit;
+
+        &::placeholder {
+            color: var(--control-placeholder-colour);
+            font-style: italic;
+            font-size: smaller;
+        }
+
+        &:focus {
+            outline: none;
+        }
+    }
+}
+
+@mixin text-input {
+
+    &:hover {
+        border-color: var(--control-hover-colour);
+    }
+
+    label {
+        @include control-label;
+    }
+
+    input {
+        box-sizing: border-box;
+        /*        color: var(--primary-foreground-colour);*/
+        caret-color: var(--primary-foreground-colour);
+        /*        border: var(--control-border);
+        border-radius: 0.25rem;
+        font: inherit;
+        font-weight: normal;
+        width: 100%;*/
+        /*background-color: transparent;*/
+
+        &::placeholder {
+            color: var(--control-placeholder-colour);
+            font-style: italic;
+            font-size: smaller;
+        }
+
+        &:focus {
+            outline: none;
+        }
+
+
+
+        &:disabled {
+            background-color: var(--control-disabled-colour);
+        }
+    }
+
+    &.invalid {
+        label {
+            color: var(--control-invalid-colour);
+        }
+
+        input {
+            border-color: var(--control-invalid-colour);
+        }
+    }
+
+    &.disabled {
+        pointer-events: none;
+
+
+        label {
+            color: var(--control-disabled-colour);
+        }
+
+        $stripe-colour: #a8a8a8;
+
+        input {
+            background-image: linear-gradient(135deg, $stripe-colour 8.33%, transparent 8.33%, transparent 50%, $stripe-colour 50%, $stripe-colour 58.33%, transparent 58.33%, transparent 100%);
+            background-size: 8.49px 8.49px;
+        }
+    }
+}

@@ -1,0 +1,129 @@
+﻿@import "_material-design-color-palettes";
+
+/* ONLY include this file in a global context such as app.scss*/
+$white: #ffffff;
+$black: #000000;
+
+@function derive-rgb-values-from-hex($hex) {
+    @return red($hex), green($hex), blue($hex),
+}
+
+@function rgba-ex($rgb-name, $alpha) {
+    $rgba: "rgba(var(#{$rgb-name}),#{$alpha})";
+    @return #{$rgba}
+}
+
+:root {
+    --white-rgb: 255, 255, 255;
+    --black-rgb: 0, 0, 0;
+    --white: rgba(255, 255, 255, 1);
+    --black: rgba(0, 0, 0, 1);
+
+    @each $item, $i in $mdc-colours {
+        #{$item}-rgb: #{derive-rgb-values-from-hex($i)};
+        $rgba: "rgba(var(#{$item}-rgb), 1)";
+        #{$item}: #{$rgba};
+    }
+
+    --indigo-900-dark-rgb: #{derive-rgb-values-from-hex(#000051)};
+    --indigo-900-light-rgb: #{derive-rgb-values-from-hex(#534bae)};
+}
+
+
+/*+ first some global styles */
+html, body {
+    font-family: 'Segoe UI', Verdana, 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    color: var(--primary-foreground-colour);
+    background-color: var(--primary-background-colour);
+    height: 100%;
+    margin : 0;
+}
+
+/*- first some global styles */
+:root {
+    /* first some basic usages*/
+    --primary-foreground-colour-rgb: var(--black-rgb);
+    --primary-foreground-colour: #{rgba-ex(--primary-foreground-colour-rgb, 1)};
+    --primary-background-colour-rgb: var(--white-rgb);
+    --primary-background-colour: #{rgba-ex(--primary-background-colour-rgb, 1)};
+    --secondary-foreground-colour-rgb: var(--white-rgb);
+    --secondary-foreground-colour: #{rgba-ex(--secondary-foreground-colour-rgb, 1)}; /*   var(--white);*/
+    --secondary-background-colour-rgb: var(--mdc-indigo-900-rgb);
+    --secondary-background-colour: #{rgba-ex(--secondary-background-colour-rgb, 1)};
+    --secondary-dark-colour-rgb: var(--indigo-900-dark-rgb);
+    --secondary-light-colour-rgb: var(--indigo-900-light-rgb);
+    --secondary-dark-colour: #{rgba-ex(--secondary-dark-colour-rgb, 1)};
+    --secondary-light-colour: #{rgba-ex(--secondary-light-colour-rgb, 1)};
+    --message-colour: var(--mdc-green-900);
+    --alert-colour: var(--mdc-red-500);
+    --warning-colour: var(--mdc-amber-500);
+    --overlay-colour: #{rgba-ex(--secondary-background-colour-rgb, 0.5)}; // rgba(var(--secondary-background-colour), 0.5);
+    /* colours for controls*/
+    --control-outline-colour: #{rgba-ex(--primary-foreground-colour-rgb, .85)}; //$mdc-grey-500;
+    --control-hover-colour: var(--primary-foreground-colour);
+    --control-invalid-colour: var(--alert-colour);
+    --control-disabled-colour: var(--mdc-grey-300);
+    --control-placeholder-colour: #{rgba-ex(--primary-foreground-colour-rgb, .75)};
+    --control-label-colour: #{rgba-ex(--primary-foreground-colour-rgb, .85)}; //$mdc-grey-900;
+    --control-border: 1px solid var(--control-outline-colour);
+    /* button colours*/
+    --button-primary-foreground-colour: var(--secondary-foreground-colour);
+    --button-primary-background-colour: var(--secondary-background-colour);
+    --button-secondary-foreground-colour: var(--white);
+    --button-secondary-background-colour: var(--mdc-green-900);
+    --button-warning-foreground-colour: var(--white);
+    --button-warning-background-colour: var(--mdc-amber-800);
+    --button-danger-foreground-colour: var(--white);
+    --button-danger-background-colour: var(--mdc-red-500);
+    --button-cancel-foreground-colour: var(--black);
+    --button-cancel-background-colour: var(--white);
+    --button-primary-hover-colour: #{rgba-ex(--secondary-light-colour-rgb, 1)}; //  $mdc-grey-50;
+    --button-secondary-hover-colour: var(--mdc-green-700);
+    --button-warning-hover-colour: var(--mdc-amber-700);
+    --button-cancel-hover-colour: var(--mdc-grey-50);
+    --button-danger-hover-colour: var(--mdc-red-300);
+    /* pop-up colours*/
+    --popup-overlay-colour: var(--overlay-colour);
+    --popup-background-colour: var(--primary-background-colour);
+    --popup-foreground-colour: var(--primary-foreground-colour);
+    --popup-border-colour: var(--secondary-background-colour);
+    --popup-box-shadow: rgba(0, 0, 0, 0.25) 0px 14px 28px, rgba(0, 0, 0, 0.22) 0px 10px 10px;
+    /* remove the next four once new popup has replaced old popup*/
+    --popup-footer-background-colour: var(--mdc-grey-300);
+    --popup-header-background-colour: var(--secondary-background-colour);
+    --popup-header-foreground-colour: var(--secondary-foreground-colour);
+    --popup-warning-header-background-colour: var(--warning-colour);
+    /* dialogue colours*/
+    --dialogue-footer-background-colour: var(--mdc-grey-300);
+    --dialogue-header-background-colour: var(--secondary-background-colour);
+    --dialogue-header-foreground-colour: var(--secondary-foreground-colour);
+    --dialogue-warning-header-background-colour: var(--warning-colour);
+    /* menu colours*/
+    --menu-item-foreground-colour: var(--primary-foreground-colour);
+    --menu-item-background-colour: transparent; /*var(--primary-background-colour);*/
+    --menu-item-active-foreground-colour: var(--secondary-foreground-colour);
+    --menu-item-active-background-colour: var(--secondary-background-colour);
+    --menu-item-hover-background-colour: var(--secondary-light-colour);
+    --menu-item-hover-foreground-colour: var(--secondary-dark-colour);
+    --menu-toggle-bars-open-foreground-colour: var(--menu-item-foreground-colour);
+    --menu-toggle-bars-closed-foreground-colour: #{rgba-ex(--primary-foreground-colour-rgb, 0.5)};
+    --menu-toggle-bars-hover-colour: var(--secondary-foreground-colour);
+    --menu-toggle-bars-background-colour: #{rgba-ex(--white-rgb, 0.1)};
+    --menu-toggle-bars-hover-background-colour: var(--black);
+    /* tab colors */
+    --tab-foreground-colour-rgb: var(--secondary-foreground-colour-rgb);
+    --tab-background-colour-rgb: var(--secondary-dark-colour-rgb);
+    --tab-active-foreground-colour-rgb: var(--secondary-foreground-colour-rgb);
+    --tab-active-background-colour-rgb: var(--secondary-background-colour-rgb);
+    /* miscellaneous colours*/
+    --search-box-clear-icon-colour: var(--mdc-red-500);
+    --search-box-start-icon-colour: var(--mdc-green-500);
+    --scrollbar-colour: var(--control-hover-colour) var(--secondary-foreground-colour);
+    --scrollbar-track-colour: var(--secondary-dark-colour);
+    --scrollbar-thumb-colour: var(--secondary-light-colour);
+    --scrollbar-thumb-border-colour: var(--scrollbar-thumb-colour);
+    --datepicker-today-colour: var(--mdc-green-500);
+    --datepicker-holiday-colour: var(--mdc-red-500);
+    --spinner-colour: #{rgba-ex(--secondary-background-colour-rgb, 0.45)};
+    --spinner-highlight-colour: #{rgba-ex(--secondary-background-colour-rgb, 0.85)};
+}

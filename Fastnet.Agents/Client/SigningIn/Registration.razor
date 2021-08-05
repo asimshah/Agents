@@ -1,0 +1,39 @@
+﻿@page "/Register"
+@inject IAuthenticationService authenticationService
+@inject NavigationManager navigationManager
+<h3>Registration</h3>
+
+<div class="registration">
+    <Dialogue @ref="dialogue" Model="@user">
+        <Body>
+            <TextBox Label="Email:" @bind-Value="@user.Email" ValidationFor="@(() => user.Email)" />
+            <PasswordBox Label="Password:" @bind-Value="@user.Password" ValidationFor="@(() => user.Password)" />
+            <PasswordBox Label="Confirm Password:" @bind-Value="@user.ConfirmPassword" ValidationFor="@(() => user.ConfirmPassword)" />
+        </Body>
+        <RightFooter>
+            <button class="btn-primary" @onclick="@Register">Register</button>
+        </RightFooter>
+    </Dialogue>
+</div>
+@code {
+    private Dialogue<RegistrationModel> dialogue;
+    private readonly RegistrationModel user = new RegistrationModel();
+
+    private async Task Register()
+    {
+        var isValid = dialogue.ValidateAnnotations();
+        if (isValid)
+        {
+            var result = await authenticationService.RegisterUserAsync(user);
+            if (!result.Success)
+            {
+                dialogue.AddErrors(result.Errors);
+            }
+            else
+            {
+                navigationManager.NavigateTo("/");
+            }
+        }
+
+    }
+} 

@@ -1,0 +1,32 @@
+﻿@inherits LayoutComponentBase
+
+<div class="page">
+    <div class="sidebar">
+        <NavigationMenu IsTopMenu="@true">
+            <NavigationMenuItem Text="Home" Match="@NavLinkMatch.All" Link="" />
+            <AuthorizeView>
+                <Authorized>
+                    <NavigationMenu Text="Backups">
+                        <NavigationMenuItem Text="QPara Backups" Link="backups/QPara" />
+                        <NavigationMenuItem Text="Asim's Backups" Link="backups/Asim" />
+                    </NavigationMenu>
+                    <NavigationMenuItem Text="Logout" Link="logout" />
+                </Authorized>
+                <NotAuthorized>
+                    @if (ShowRegistrationItem())
+                    {
+                        <NavigationMenuItem Text="Register" Link="register" />
+                    }
+                    else
+                    {
+                        <NavigationMenuItem Text="Login" Link="login" />
+                    }
+                </NotAuthorized>
+            </AuthorizeView>
+        </NavigationMenu>
+    </div>
+
+    <div class="main">
+        @Body
+    </div>
+</div>

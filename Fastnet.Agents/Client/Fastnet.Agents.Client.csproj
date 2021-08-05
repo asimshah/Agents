@@ -1,0 +1,37 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.BlazorWebAssembly">
+
+  <PropertyGroup>
+    <TargetFramework>net5.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Content Remove="compilerconfig.json" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="BuildWebCompiler" Version="1.12.405" />
+    <PackageReference Include="Fastnet.Blazor.Controls" Version="2.582.752" />
+    <PackageReference Include="Microsoft.AspNetCore.Components.Authorization" Version="5.0.8" />
+    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="5.0.8" />
+    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Authentication" Version="5.0.8" />
+    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="5.0.8" PrivateAssets="all" />
+    <PackageReference Include="System.Net.Http.Json" Version="5.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Shared\Fastnet.Agents.Shared.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Common Styles\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="compilerconfig.json" />
+  </ItemGroup>
+
+  <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
+    <Exec Command="xcopy /r /f /d  /y &quot;C:\devroot\Fastnet.Blazor.Controls\Common Styles\_forms.scss&quot; &quot;$(ProjectDir)Common Styles&quot;&#xD;&#xA;xcopy /r /f /d  /y &quot;C:\devroot\Fastnet.Blazor.Controls\Common Styles\_themes.scss&quot; &quot;$(ProjectDir)Common Styles&quot;&#xD;&#xA;xcopy /r /f /d  /y &quot;C:\devroot\Fastnet.Blazor.Controls\Common Styles\_material-design-color-palettes.scss&quot; &quot;$(ProjectDir)Common Styles&quot;&#xD;&#xA;xcopy /r /f /d  /y &quot;C:\devroot\Fastnet.Blazor.Controls\Common Styles\_theme-colours.scss&quot; &quot;$(ProjectDir)Common Styles&quot;" />
+  </Target>
+
+</Project>
