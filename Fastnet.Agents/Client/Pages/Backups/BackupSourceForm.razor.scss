@@ -1,0 +1,10 @@
+﻿@import "../../Common Styles/_themes";
+@include theme-buttons;
+
+.form {
+    width: 80vw;
+
+    @include for-ipads-and-larger {
+        width: 400px;
+    }
+}

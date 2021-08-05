@@ -1,0 +1,44 @@
+﻿@inject BackupService backupService
+<Dialogue @ref="@dialogue" Model="@Model" Modal="true">
+    <Header>
+        <div>Source Folder</div>
+    </Header>
+    <Body>
+        <div class="form">
+            <TextBox Label="Name" @bind-Value="@Model.DisplayName" ValidationFor="@(() => Model.DisplayName)" />
+            <TextBox Label="Full Path" @bind-Value="@Model.FullPath" ValidationFor="@(() => Model.FullPath)" />
+            @*<TextBox Label="Drive Label" @bind-Value="@Model.BackupDriveLabel" ValidationFor="@(() => Model.BackupDriveLabel)" />*@
+            <DropdownList @bind-Value="@driveIndex" Label="Backup Drive" TValue="int">
+                @foreach (var item in drives)
+                {
+                    <DropdownItem ItemValue="@item.Index" ItemDescription="@item.ToString()" />
+                }
+            </DropdownList>
+            <TextBox Label="Backup Folder" @bind-Value="@Model.BackupFolder" ValidationFor="@(() => Model.BackupFolder)" />
+            <RadioButtonGroup Label="Source Type" @bind-Value="@Model.Type">
+                <RadioButtonItem ItemValue="@SourceType.Folder" />
+                <RadioButtonItem ItemValue="@SourceType.Replication" />
+                <RadioButtonItem ItemValue="@SourceType.Website" />
+            </RadioButtonGroup>
+            <TextBox Label="Site Content Root" @bind-Value="@Model.ContentRoot" ValidationFor="@(() => Model.ContentRoot)" />
+            <CheckBox Label="Enabled" @bind-Value="@Model.BackupEnabled" />
+            <CheckBox Label="Auto Delete" @bind-Value="@Model.AutoDelete" />
+            @if (Model.AutoDelete)
+            {
+                <NumberInput Label="Delete After (days)" @bind-Value="@Model.DeleteAfter" Minimum="1" Maximum="60" />
+            }
+        </div>
+    </Body>
+    <LeftFooter>
+        @if (Model.Id > 0)
+        {
+            <button class="btn-danger" @onclick="@OnDelete">Delete</button>
+        }
+    </LeftFooter>
+    <RightFooter>
+        <button class="btn-primary" @onclick="@OnOK">OK</button>
+        <button class="btn-cancel" @onclick="@OnCancel">Cancel</button>
+    </RightFooter>
+</Dialogue>
+<MessageBox @ref="mb" />
+

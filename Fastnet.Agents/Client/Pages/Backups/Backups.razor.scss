@@ -1,0 +1,106 @@
+﻿@import "../../Common Styles/_themes.scss";
+@include theme-buttons;
+
+.main {
+    height: 100%;
+    display: grid;
+    grid-template-columns: 1fr;
+    grid-template-rows: auto 1fr;
+    align-items: stretch;
+
+    .panel {
+        display: grid;
+        grid-template-columns: 1fr;
+        grid-template-rows: 1fr auto 2rem;
+    }
+}
+
+.backup-commands {
+    display: grid;
+    grid-template-columns: auto auto;
+    justify-content: space-between;
+
+}
+.source-folders {
+    table {
+        $border: 1px solid var(--primary-foreground-colour);
+        border-collapse: collapse;
+        margin-block-start: 0.5rem;
+        border: $border;
+        background-color: var(--white);
+        border-collapse: collapse;
+
+        th, td {
+            text-align: left;
+            padding-left: 0.25rem;
+            padding-right: 0.25rem;
+            vertical-align: top;
+
+            &:not(:first-child) {
+                border-left: $border;
+            }
+        }
+
+        thead {
+            tr {
+                background-color: var(--primary-foreground-colour);
+                color: var(--primary-background-colour);
+                border-bottom: $border;
+            }
+        }
+
+        tbody {
+            tr:not(:last-child) {
+                border-bottom: $border;
+            }
+
+            td {
+                &.align-right {
+                    text-align: right;
+                }
+
+                &:not(:first-child) {
+                    border-left: $border;
+                }
+            }
+        }
+    }
+
+    .expander {
+        border-right: 3px solid gray;
+    }
+
+    .backup-list {
+        padding-left: 0;
+
+        table {
+            font-size: 12px;
+            border: none;
+            font-size: 14px;
+            margin-block-start: 0;
+
+            tbody {
+
+
+                td {
+                    &.align-right {
+                        text-align: right;
+                    }
+
+                    &.file-length {
+                        //text-align: right;
+                        min-width: 72px;
+                    }
+
+                    &:not(:first-child) {
+                        border-left: 1px dotted var(--primary-foreground-colour);
+                    }
+
+                    code {
+                        color: brown;
+                    }
+                }
+            }
+        }
+    }
+}

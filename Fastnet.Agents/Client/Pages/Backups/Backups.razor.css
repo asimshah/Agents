@@ -1,0 +1,168 @@
+﻿/*
+@import "material-design-color-palettes";*/
+.btn-primary, a.btn-primary, .btn-secondary, a.btn-secondary, .btn-warning, a.btn-warning, .btn-danger, a.btn-danger, .btn-cancel, a.btn-cancel {
+  font-family: inherit;
+  font-size: 1rem;
+  /*    margin: 0.125rem;*/
+  display: inline-block;
+  font-weight: 400;
+  text-align: center;
+  vertical-align: middle;
+  user-select: none;
+  padding: 0.375rem 0.75rem;
+  font-size: 1rem;
+  line-height: 1.5;
+  border-radius: 0.25rem; }
+
+.btn-primary, a.btn-primary, .btn-secondary, a.btn-secondary, .btn-warning, a.btn-warning, .btn-danger, a.btn-danger, .btn-cancel, a.btn-cancel {
+  white-space: nowrap;
+  text-decoration: none;
+  outline: none;
+  border: var(--control-border); }
+  [disabled].btn-primary, [disabled].btn-secondary, [disabled].btn-warning, [disabled].btn-danger, [disabled].btn-cancel, .disabled.btn-primary, .disabled.btn-secondary, .disabled.btn-warning, .disabled.btn-danger, .disabled.btn-cancel {
+    cursor: none;
+    pointer-events: none;
+    background-color: var(--control-disabled-colour);
+    background-color: var(--control-disabled-colour); }
+
+.btn-primary, a.btn-primary {
+  color: var(--button-primary-foreground-colour);
+  background-color: var(--button-primary-background-colour);
+  border: none;
+  outline: none; }
+  .btn-primary:hover, a.btn-primary:hover {
+    background-color: var(--button-primary-hover-colour);
+    color: var(--button-primary-foreground-colour); }
+  .btn-primary:focus, a.btn-primary:focus {
+    outline: none;
+    box-shadow: none; }
+  .btn-primary:active, a.btn-primary:active {
+    outline: none;
+    /*            background-color: inherit;*/ }
+
+.btn-secondary, a.btn-secondary {
+  color: var(--button-secondary-foreground-colour);
+  background-color: var(--button-secondary-background-colour);
+  border: none;
+  outline: none; }
+  .btn-secondary:hover, a.btn-secondary:hover {
+    background-color: var(--button-secondary-hover-colour);
+    color: var(--button-secondary-foreground-colour); }
+  .btn-secondary:focus, a.btn-secondary:focus {
+    outline: none;
+    box-shadow: none; }
+  .btn-secondary:active, a.btn-secondary:active {
+    outline: none;
+    /*            background-color: inherit;*/ }
+
+.btn-warning, a.btn-warning {
+  color: var(--button-warning-foreground-colour);
+  background-color: var(--button-warning-background-colour);
+  border: none;
+  outline: none; }
+  .btn-warning:hover, a.btn-warning:hover {
+    background-color: var(--button-warning-hover-colour);
+    color: var(--button-warning-foreground-colour); }
+  .btn-warning:focus, a.btn-warning:focus {
+    outline: none;
+    box-shadow: none; }
+  .btn-warning:active, a.btn-warning:active {
+    outline: none;
+    /*            background-color: inherit;*/ }
+
+.btn-danger, a.btn-danger {
+  color: var(--button-danger-foreground-colour);
+  background-color: var(--button-danger-background-colour);
+  border: none;
+  outline: none; }
+  .btn-danger:hover, a.btn-danger:hover {
+    background-color: var(--button-danger-hover-colour);
+    color: var(--button-danger-foreground-colour); }
+  .btn-danger:focus, a.btn-danger:focus {
+    outline: none;
+    box-shadow: none; }
+  .btn-danger:active, a.btn-danger:active {
+    outline: none;
+    /*            background-color: inherit;*/ }
+
+.btn-cancel, a.btn-cancel {
+  color: var(--button-cancel-foreground-colour);
+  background-color: var(--button-cancel-background-colour);
+  border: none;
+  outline: none;
+  border-style: solid;
+  border-width: 1px;
+  border-color: var(--button-cancel-foreground-colour); }
+  .btn-cancel:hover, a.btn-cancel:hover {
+    background-color: var(--button-cancel-hover-colour);
+    color: var(--button-cancel-foreground-colour); }
+  .btn-cancel:focus, a.btn-cancel:focus {
+    outline: none;
+    box-shadow: none; }
+  .btn-cancel:active, a.btn-cancel:active {
+    outline: none;
+    /*            background-color: inherit;*/ }
+
+.btn-slim {
+  line-height: 1.0;
+  font-size: 12px;
+  padding: 0.3rem 0.5rem; }
+
+.main {
+  height: 100%;
+  display: grid;
+  grid-template-columns: 1fr;
+  grid-template-rows: auto 1fr;
+  align-items: stretch; }
+  .main .panel {
+    display: grid;
+    grid-template-columns: 1fr;
+    grid-template-rows: 1fr auto 2rem; }
+
+.backup-commands {
+  display: grid;
+  grid-template-columns: auto auto;
+  justify-content: space-between; }
+
+.source-folders table {
+  border-collapse: collapse;
+  margin-block-start: 0.5rem;
+  border: 1px solid var(--primary-foreground-colour);
+  background-color: var(--white);
+  border-collapse: collapse; }
+  .source-folders table th, .source-folders table td {
+    text-align: left;
+    padding-left: 0.25rem;
+    padding-right: 0.25rem;
+    vertical-align: top; }
+    .source-folders table th:not(:first-child), .source-folders table td:not(:first-child) {
+      border-left: 1px solid var(--primary-foreground-colour); }
+  .source-folders table thead tr {
+    background-color: var(--primary-foreground-colour);
+    color: var(--primary-background-colour);
+    border-bottom: 1px solid var(--primary-foreground-colour); }
+  .source-folders table tbody tr:not(:last-child) {
+    border-bottom: 1px solid var(--primary-foreground-colour); }
+  .source-folders table tbody td.align-right {
+    text-align: right; }
+  .source-folders table tbody td:not(:first-child) {
+    border-left: 1px solid var(--primary-foreground-colour); }
+
+.source-folders .expander {
+  border-right: 3px solid gray; }
+
+.source-folders .backup-list {
+  padding-left: 0; }
+  .source-folders .backup-list table {
+    font-size: 12px;
+    border: none;
+    font-size: 14px;
+    margin-block-start: 0; }
+    .source-folders .backup-list table tbody td.align-right {
+      text-align: right; }
+    .source-folders .backup-list table tbody td.file-length {
+      min-width: 72px; }
+    .source-folders .backup-list table tbody td:not(:first-child) {
+      border-left: 1px dotted var(--primary-foreground-colour); }
+    .source-folders .backup-list table tbody td code {
+      color: brown; }

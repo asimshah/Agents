@@ -1,0 +1,110 @@
+﻿@page "/backups/{name}"
+@inject BackupService backupService
+@inject JSTools jsTools;
+@if (Owner != null)
+{
+    <div class="main">
+        <h3>@Owner.Name</h3>
+        <div class="panel">
+            @if (Owner.BackupSourceFolders.Count() == 0)
+            {
+                <p>There are no backup sources defined</p>
+            }
+            else
+            {
+                <div class="source-folders">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th></th>
+                                <th>Enabled</th>
+                                <th>Name</th>
+                                <th>Type</th>
+                                <th>Full Path</th>
+                                <th>Content Root</th>
+                                <th>Backup Drive Label</th>
+                                <th>Backup Folder</th>
+                                <th>Auto Delete</th>
+                                <th>Delete After (days)</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var bsf in Owner.BackupSourceFolders)
+                            {
+                                <tr>
+                                    <td><span class="oi @GetToggleStateClass(bsf)" @onclick="@(() => ToggleSourceFolder(bsf))"></span></td>
+                                    <td>
+                                        @if (bsf.BackupEnabled)
+                                        {
+                                            <span class="oi oi-task"></span>
+                                        }
+                                    </td>
+                                    <td>@bsf.DisplayName</td>
+                                    <td>@bsf.Type</td>
+                                    <td>@bsf.FullPath</td>
+                                    <td>@bsf.ContentRoot</td>
+                                    <td>@bsf.BackupDriveLabel</td>
+                                    <td>@bsf.BackupFolder</td>
+                                    @if (bsf.AutoDelete)
+                                    {
+                                        <td><span class="oi oi-task"></span></td>
+                                        <td class="align-right">@bsf.DeleteAfter</td>
+                                    }
+                                    else
+                                    {
+                                        <td></td>
+                                        <td></td>
+                                    }
+                                    <td class="edit-column"><button class="btn-primary btn-slim" @onclick="@(() => EditSourceFolderAsync(bsf))">Edit ...</button></td>
+                                </tr>
+                                @if (GetToggleState(bsf))
+                                {
+                                    <tr>
+                                        <td class="expander"></td>
+                                        <td class="backup-list" colspan="10">
+                                            <table>
+                                                <tbody>
+                                                    @foreach (var item in bsf.Backups)
+                                                    {
+                                                        <tr>
+                                                            <td>@item.BackupDateUTC.ToLocalTime().ToDefault()</td>
+                                                            <td>@item.State</td>
+                                                            @if (item.State == BackupState.Finished)
+                                                            {
+                                                                <td class="file-name"><code>@item.FullFilename.Replace(@"\\?\", "")</code></td>
+                                                                <td class="file-length align-right">@((item.Length / (1024 * 1024)).ToString("#,###.0")) MB</td>
+                                                                <td><span>backed up on @item.BackedUpOnUTC.ToLocalTime().ToDefaultWithTime()</span></td>
+                                                                @*<td><button class="btn-primary btn-slim" @onclick="@(() => DownloadBackupAsync(item))">Download</button></td>*@
+                                                                <td><button class="btn-danger btn-slim" @onclick="@(() => DeleteBackupAsync(bsf, item))">Delete</button></td>
+                                                            }
+                                                            else
+                                                            {
+                                                                <td></td>
+                                                                <td></td>
+                                                                <td>@item.Remark</td>
+                                                                @*<td></td>*@
+                                                                <td></td>
+                                                            }
+
+                                                        </tr>
+                                                    }
+                                                </tbody>
+                                            </table>
+                                        </td>
+                                    </tr>
+                                }
+                            }
+                        </tbody>
+                    </table>
+
+                </div>
+            }
+            <div class="backup-commands">
+                <button class="btn-primary" @onclick="@AddSourceFolderAsync">Add Backup Source</button>
+            </div>
+        </div>
+    </div>
+    <BackupSourceForm @ref="bsf" Owner="@Owner" />
+}
+<BusySpinner IsBusy="@isBusy" Delay="1000"/>
