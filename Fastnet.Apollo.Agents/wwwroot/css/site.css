@@ -69,3 +69,88 @@ body {
   white-space: nowrap;
   line-height: 60px; /* Vertically center the text there */
 }
+:root {
+    --red: red;
+    --green: forestgreen;
+    --table-border: 1px solid lightgray;
+    --gutter: 0.25em;
+    --line-space: 1em;
+    --space:calc(var(--line-space) * 0.5);
+    --half-space: calc(var(--space) * 0.5);
+    --double-line-space: calc(var(--line-space) * 2);
+    --rule: 1px solid var(--green);
+    --inverted-rule: 1px solid white;
+    --background-color: white;
+    --inverted-background-color: var(--green);
+    --color: black;
+    --inverted-color: white;
+    --indent: var(--line-space);
+}
+.status-page-title {
+    font-size: large;
+}
+.agents-table {
+    margin: var(--double-line-space);
+}
+.agents-table  td, th {
+    border: var(--table-border);
+    padding: var(--space);
+}
+.agents-table th {
+    color: var(--green);
+}
+.agents-table .agent-name {
+    font-weight: bold;
+}
+.agents-table .agent-description, .agents-table .database-backup-folders, .agents-table .web-site {
+    font-size: small;
+}
+.agents-table .agent-description {
+    font-style: italic;
+}
+.agents-table .backup-definition, .agents-table .portable-library-root {
+    font-family: 'Courier New';
+    font-size: smaller;
+    color: brown;
+}
+.banner {
+    background-color:var(--inverted-background-color);
+    color: var(--inverted-color);
+    padding: var(--space);
+    border-radius: var(--gutter);
+}
+.title {
+    font-size:16px;
+    font-weight: bold;
+}
+.details {
+    border-top: var(--rule);
+    margin-top: var(--half-space);
+    padding-top: var(--half-space);
+    font-size: smaller;
+}
+.details .label {
+    font-style: italic;
+}
+.details .folder {
+    width:100%;
+}
+.details .run-now button {
+    width: 120px;
+}
+.web-db-backup .web-sites .site-name {
+    margin-top: var(--line-space);
+    font-size: 14px;
+    font-weight: bold;
+}
+
+.web-db-backup .alert-message {
+    color: var(--red);
+    font-style: italic;
+    margin-left: var(--indent);
+}
+.web-db-backup .zip-file-name {
+    color: var(--green);
+    font-style: italic;
+    margin-left: var(--indent);
+}
