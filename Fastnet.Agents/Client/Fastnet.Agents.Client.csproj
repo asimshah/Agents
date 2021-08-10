@@ -5,6 +5,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Content Remove="compilerconfig.json" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Fastnet.Blazor.Controls" Version="2.586.739" />
     <PackageReference Include="Fastnet.Plugins" Version="2.586.746" />
     <PackageReference Include="Microsoft.AspNetCore.Components.Authorization" Version="5.0.8" />
@@ -20,6 +24,10 @@
 
   <ItemGroup>
     <Folder Include="Common Styles\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="compilerconfig.json" />
   </ItemGroup>
 
   <Target Name="PreBuild" BeforeTargets="PreBuildEvent">

@@ -1,0 +1,22 @@
+﻿[
+  {
+    "outputFile": "wwwroot/css/app.css",
+    "inputFile": "Styles/app.scss"
+  },
+  {
+    "outputFile": "Pages/Backups/Backups.razor.css",
+    "inputFile": "Pages/Backups/Backups.razor.scss"
+  },
+  {
+    "outputFile": "Pages/Backups/BackupSourceForm.razor.css",
+    "inputFile": "Pages/Backups/BackupSourceForm.razor.scss"
+  },
+  {
+    "outputFile": "Shared/MainLayout.razor.css",
+    "inputFile": "Shared/MainLayout.razor.scss"
+  },
+  {
+    "outputFile": "SigningIn/Registration.razor.css",
+    "inputFile": "SigningIn/Registration.razor.scss"
+  }
+]
