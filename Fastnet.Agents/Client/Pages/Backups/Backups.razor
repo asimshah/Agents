@@ -33,7 +33,16 @@
                             @foreach (var bsf in Owner.BackupSourceFolders)
                             {
                                 <tr>
-                                    <td><span class="oi @GetToggleStateClass(bsf)" @onclick="@(() => ToggleSourceFolder(bsf))"></span></td>
+                                    <td>
+                                        @if (bsf.Backups.Count() > 0)
+                                        {
+                                            <span class="oi @GetToggleStateClass(bsf)" @onclick="@(() => ToggleSourceFolder(bsf))"></span>
+                                        }
+                                        else
+                                        {
+                                            <span>&nbsp;</span>
+                                        }
+                                    </td>
                                     <td>
                                         @if (bsf.BackupEnabled)
                                         {
@@ -73,7 +82,7 @@
                                                             @if (item.State == BackupState.Finished)
                                                             {
                                                                 <td class="file-name"><code>@item.FullFilename.Replace(@"\\?\", "")</code></td>
-                                                                <td class="file-length align-right">@((item.Length / (1024 * 1024)).ToString("#,###.0")) MB</td>
+                                                                <td class="file-length align-right">@GetFormattedLength(item)</td>
                                                                 <td><span>backed up on @item.BackedUpOnUTC.ToLocalTime().ToDefaultWithTime()</span></td>
                                                                 @*<td><button class="btn-primary btn-slim" @onclick="@(() => DownloadBackupAsync(item))">Download</button></td>*@
                                                                 <td><button class="btn-danger btn-slim" @onclick="@(() => DeleteBackupAsync(bsf, item))">Delete</button></td>
@@ -102,9 +111,10 @@
             }
             <div class="backup-commands">
                 <button class="btn-primary" @onclick="@AddSourceFolderAsync">Add Backup Source</button>
+                <button class="btn-primary" @onclick="@Refresh">Refresh</button>
             </div>
         </div>
     </div>
     <BackupSourceForm @ref="bsf" Owner="@Owner" />
 }
-<BusySpinner IsBusy="@isBusy" Delay="1000"/>
+<BusySpinner IsBusy="@isBusy" Delay="1000" />

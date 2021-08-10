@@ -47,6 +47,7 @@ namespace Fastnet.Agents.Server
             services.AddSingleton<ScheduledTask, TestService>();
             services.AddSingleton<ScheduledTask, ScheduleBackupsService>();
             services.AddSingleton<ScheduledTask, BackupTask>();
+
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

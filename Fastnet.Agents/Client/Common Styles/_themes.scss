@@ -11,7 +11,49 @@ $black: #000000;
     font-weight: 500;
     margin-bottom: 0;
 }
+@mixin standard-table-layout {
+    $border: 1px solid var(--primary-foreground-colour);
+    border-collapse: collapse;
+    margin-block-start: 0.5rem;
+    border: $border;
+    background-color: var(--white);
+    border-collapse: collapse;
 
+    th, td {
+        text-align: left;
+        padding-left: 0.25rem;
+        padding-right: 0.25rem;
+        vertical-align: top;
+
+        &:not(:first-child) {
+            border-left: $border;
+        }
+    }
+
+    thead {
+        tr {
+            background-color: var(--primary-foreground-colour);
+            color: var(--primary-background-colour);
+            border-bottom: $border;
+        }
+    }
+
+    tbody {
+        tr:not(:last-child) {
+            border-bottom: $border;
+        }
+
+        td {
+            &.align-right {
+                text-align: right;
+            }
+
+            &:not(:first-child) {
+                border-left: $border;
+            }
+        }
+    }
+}
 @mixin scrollable-table-container ($height: calc(100vh - 200px) ) {
     height: $height;
     overflow-y: auto;

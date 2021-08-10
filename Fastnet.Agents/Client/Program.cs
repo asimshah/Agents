@@ -24,6 +24,7 @@ namespace Fastnet.Agents.Client
             builder.Services.AddSimpleAuthentication<AuthenticationService>();
             builder.Services.AddScoped<BackupService>();
             builder.Services.AddFastnetBlazorControls();
+            builder.Services.AddScoped<CoreService>();
             await builder.Build().RunAsync();
         }
     }

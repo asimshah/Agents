@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -29,7 +30,8 @@ namespace Fastnet.Agents.Server.Controllers
             var result = await base.RegisterNewUserAsync(newUserModel);
             if (result.IsSuccess())
             {
-                var user = result.Get<UserAccountDTO>();
+                Debug.Assert(result is OkObjectResult);
+                UserAccountDTO user = (result as OkObjectResult).Value as UserAccountDTO;
                 // do more with user but remember this user has already been created in dbo.UserAccounts by UserManager
                 await db.SaveChangesAsync();
             }

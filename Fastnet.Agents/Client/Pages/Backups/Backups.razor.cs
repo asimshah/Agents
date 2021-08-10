@@ -26,7 +26,7 @@ namespace Fastnet.Agents.Client.Pages.Backups
             if(result.Success)
             {
                 Owner = result.Data;
-                Console.WriteLine($"");
+                //Console.WriteLine($"");
             }
         }
         private async Task ShowFormAsync(BackupSourceFolderDTO sf = null)
@@ -88,6 +88,18 @@ namespace Fastnet.Agents.Client.Pages.Backups
                 StateHasChanged();
             }
             isBusy = false;
+        }
+        private async Task Refresh()
+        {
+            await LoadOwnerAsync();
+        }
+        private string GetFormattedLength(BackupDTO backup)
+        {
+            if(backup.Length > 1000 * 1000 * 10)
+            {
+                return (backup.Length / (1000 * 1000)).ToString("N1") + " MB";
+            }
+            return (backup.Length / 1000).ToString("N1") + " KB";
         }
         //private async Task DownloadBackupAsync(BackupDTO backup)
         //{
