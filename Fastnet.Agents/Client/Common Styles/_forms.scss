@@ -41,11 +41,15 @@ label {
             color: var(--control-disabled-colour);
         }
 
-        $stripe-colour: #a8a8a8;
+        $stripe-colour: var(--control-disabled-colour);
 
         input {
             background-image: linear-gradient(135deg, $stripe-colour 8.33%, transparent 8.33%, transparent 50%, $stripe-colour 50%, $stripe-colour 58.33%, transparent 58.33%, transparent 100%);
             background-size: 8.49px 8.49px;
+        }
+
+        .border-here {
+            border-color: var(--control-disabled-colour);
         }
     }
 

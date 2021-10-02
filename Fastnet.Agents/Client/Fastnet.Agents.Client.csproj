@@ -9,8 +9,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Fastnet.Blazor.Controls" Version="2.586.739" />
-    <PackageReference Include="Fastnet.Plugins" Version="2.586.746" />
+    <PackageReference Include="Fastnet.Blazor.Controls" Version="2.596.851" />
+    <PackageReference Include="Fastnet.Plugins" Version="2.587.866" />
     <PackageReference Include="Microsoft.AspNetCore.Components.Authorization" Version="5.0.8" />
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="5.0.8" />
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Authentication" Version="5.0.8" />

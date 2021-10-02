@@ -7,7 +7,9 @@ $black: #000000;
 @function derive-rgb-values-from-hex($hex) {
     @return red($hex), green($hex), blue($hex),
 }
-
+/* CSS4 introduces a coloe change function which, hopefully, will obviate the need for this
+    function
+*/
 @function rgba-ex($rgb-name, $alpha) {
     $rgba: "rgba(var(#{$rgb-name}),#{$alpha})";
     @return #{$rgba}
@@ -25,6 +27,8 @@ $black: #000000;
         #{$item}: #{$rgba};
     }
 
+    --indigo-900-dark: #000051;
+    --indigo-900-light: #534bae;
     --indigo-900-dark-rgb: #{derive-rgb-values-from-hex(#000051)};
     --indigo-900-light-rgb: #{derive-rgb-values-from-hex(#534bae)};
 }
@@ -43,11 +47,11 @@ html, body {
 :root {
     /* first some basic usages*/
     --primary-foreground-colour-rgb: var(--black-rgb);
-    --primary-foreground-colour: #{rgba-ex(--primary-foreground-colour-rgb, 1)};
+    --primary-foreground-colour: var(--black); // #{rgba-ex(--primary-foreground-colour-rgb, 1)};
     --primary-background-colour-rgb: var(--white-rgb);
-    --primary-background-colour: #{rgba-ex(--primary-background-colour-rgb, 1)};
+    --primary-background-colour: var(--white); // #{rgba-ex(--primary-background-colour-rgb, 1)};
     --secondary-foreground-colour-rgb: var(--white-rgb);
-    --secondary-foreground-colour: #{rgba-ex(--secondary-foreground-colour-rgb, 1)}; /*   var(--white);*/
+    --secondary-foreground-colour: var(--white); // #{rgba-ex(--secondary-foreground-colour-rgb, 1)};
     --secondary-background-colour-rgb: var(--mdc-indigo-900-rgb);
     --secondary-background-colour: #{rgba-ex(--secondary-background-colour-rgb, 1)};
     --secondary-dark-colour-rgb: var(--indigo-900-dark-rgb);
@@ -100,6 +104,7 @@ html, body {
     --dialogue-warning-header-background-colour: var(--warning-colour);
     /* menu colours*/
     --menu-item-foreground-colour: var(--primary-foreground-colour);
+    /*--menu-item-foreground-colour-rgb: #{rgba-ex(--secondary-light-colour-rgb, 1)};*/
     --menu-item-background-colour: transparent; /*var(--primary-background-colour);*/
     --menu-item-active-foreground-colour: var(--secondary-foreground-colour);
     --menu-item-active-background-colour: var(--secondary-background-colour);
@@ -107,14 +112,18 @@ html, body {
     --menu-item-hover-foreground-colour: var(--secondary-dark-colour);
     --menu-toggle-bars-open-foreground-colour: var(--menu-item-foreground-colour);
     --menu-toggle-bars-closed-foreground-colour: #{rgba-ex(--primary-foreground-colour-rgb, 0.5)};
-    --menu-toggle-bars-hover-colour: var(--secondary-foreground-colour);
+    --menu-toggle-bars-hover-foreground-colour: var(--secondary-foreground-colour);
     --menu-toggle-bars-background-colour: #{rgba-ex(--white-rgb, 0.1)};
     --menu-toggle-bars-hover-background-colour: var(--black);
     /* tab colors */
-    --tab-foreground-colour-rgb: var(--secondary-foreground-colour-rgb);
+/*    --tab-foreground-colour-rgb: var(--secondary-foreground-colour-rgb);
     --tab-background-colour-rgb: var(--secondary-dark-colour-rgb);
     --tab-active-foreground-colour-rgb: var(--secondary-foreground-colour-rgb);
-    --tab-active-background-colour-rgb: var(--secondary-background-colour-rgb);
+    --tab-active-background-colour-rgb: var(--secondary-background-colour-rgb);*/
+    --tab-foreground-colour: var(--secondary-foreground-colour);
+    --tab-background-colour: var(--secondary-dark-colour);
+    --tab-active-foreground-colour: var(--secondary-foreground-colour);
+    --tab-active-background-colour: var(--secondary-background-colour);
     /* miscellaneous colours*/
     --search-box-clear-icon-colour: var(--mdc-red-500);
     --search-box-start-icon-colour: var(--mdc-green-500);

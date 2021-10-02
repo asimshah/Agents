@@ -17,64 +17,64 @@ using System.Diagnostics;
 
 namespace Fastnet.Agents.Server.Models
 {
-    public abstract class WebDbContext : DbContext //where T : WebDbContext<T>
-    {
-        private string connectionString;
-        private readonly string connectionName;
-        private readonly IConfiguration config;
-        private readonly IWebHostEnvironment env;
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="cn"></param>
-        public WebDbContext(string connectionName, IConfiguration cfg, IWebHostEnvironment environment)
-        {
-            this.connectionName = connectionName;
-            this.config = cfg;
-            this.env = environment;
-            //SetConnectionString(connectionName);
-        }
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="contextOptions"></param>
-        public WebDbContext(DbContextOptions contextOptions) : base(contextOptions)
-        {
+    //public abstract class WebDbContext : DbContext //where T : WebDbContext<T>
+    //{
+    //    private string connectionString;
+    //    private readonly string connectionName;
+    //    private readonly IConfiguration config;
+    //    private readonly IWebHostEnvironment env;
+    //    /// <summary>
+    //    /// 
+    //    /// </summary>
+    //    /// <param name="cn"></param>
+    //    public WebDbContext(string connectionName, IConfiguration cfg, IWebHostEnvironment environment)
+    //    {
+    //        this.connectionName = connectionName;
+    //        this.config = cfg;
+    //        this.env = environment;
+    //        //SetConnectionString(connectionName);
+    //    }
+    //    /// <summary>
+    //    /// 
+    //    /// </summary>
+    //    /// <param name="contextOptions"></param>
+    //    public WebDbContext(DbContextOptions contextOptions) : base(contextOptions)
+    //    {
 
-        }
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="optionsBuilder"></param>
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        {
-            if (!optionsBuilder.IsConfigured)
-            {
-                if(!string.IsNullOrWhiteSpace(connectionName))
-                {
-                    SetConnectionString(connectionName);
-                }
-                optionsBuilder.UseSqlServer(connectionString)
-                    .UseLazyLoadingProxies();
-                ;
-            }
-            else
-            {
-                base.OnConfiguring(optionsBuilder);
-            }
-        }
-        private void SetConnectionString(string connectionName)
-        {
-            //var config = this.Database.GetService<IConfiguration>();
-            //Debug.Assert(config != null);
-            var cs = config.GetConnectionString(connectionName);
-            Debug.Assert(cs != null && cs != string.Empty, $"connection string for {connectionName} not found");
-            //var env = this.Database.GetService<IWebHostEnvironment>();
-            //Debug.Assert(env != null);
-            this.connectionString = env.LocaliseConnectionString(cs);
-            Debug.Assert(!string.IsNullOrWhiteSpace(connectionString));
-        }
-    }
+    //    }
+    //    /// <summary>
+    //    /// 
+    //    /// </summary>
+    //    /// <param name="optionsBuilder"></param>
+    //    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+    //    {
+    //        if (!optionsBuilder.IsConfigured)
+    //        {
+    //            if(!string.IsNullOrWhiteSpace(connectionName))
+    //            {
+    //                SetConnectionString(connectionName);
+    //            }
+    //            optionsBuilder.UseSqlServer(connectionString)
+    //                .UseLazyLoadingProxies();
+    //            ;
+    //        }
+    //        else
+    //        {
+    //            base.OnConfiguring(optionsBuilder);
+    //        }
+    //    }
+    //    private void SetConnectionString(string connectionName)
+    //    {
+    //        //var config = this.Database.GetService<IConfiguration>();
+    //        //Debug.Assert(config != null);
+    //        var cs = config.GetConnectionString(connectionName);
+    //        Debug.Assert(cs != null && cs != string.Empty, $"connection string for {connectionName} not found");
+    //        //var env = this.Database.GetService<IWebHostEnvironment>();
+    //        //Debug.Assert(env != null);
+    //        this.connectionString = env.LocaliseConnectionString(cs);
+    //        Debug.Assert(!string.IsNullOrWhiteSpace(connectionString));
+    //    }
+    //}
 
     public class AgentsDBFactory : IDesignTimeDbContextFactory<AgentsDb>
     {
@@ -151,20 +151,7 @@ namespace Fastnet.Agents.Server.Models
         {
 
         }
-        //protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        //{
-        //    if (!optionsBuilder.IsConfigured)
-        //    {
-        //        optionsBuilder.UseSqlServer(connectionString)
-        //            .EnableDetailedErrors()
-        //            .EnableSensitiveDataLogging()
-        //            .UseLazyLoadingProxies();
-        //    }
-        //    else
-        //    {
-        //        base.OnConfiguring(optionsBuilder);
-        //    }
-        //}
+
     }
 
 }

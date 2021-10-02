@@ -35,15 +35,15 @@
         //    await LogoutAsync();
 
         //});
-        authenticationService.SetOnUnAuthorised(async () =>
+        authenticationService.SetOnUnAuthorised(() =>
         {
-            await LogoutAsync();
+            Logout();
         });
         base.OnInitialized();
     }
-    private async Task LogoutAsync()
+    private void Logout()
     {
-        await messageBox.ShowAsync(new string[] { "This session has expired.", "Please login again" }, async (dr) =>
+        messageBox.Show(new string[] { "This session has expired.", "Please login again" }, async (dr) =>
         {
             await authenticationService.LogoutAsync();
             navigationManager.NavigateTo("/");

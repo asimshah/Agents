@@ -38,7 +38,7 @@ namespace Fastnet.Agents.Client.Pages.Backups
                 driveIndex = drives.FirstOrDefault(x => x.VolumeLabel == sf.BackupDriveLabel)?.Index ?? drives.First().Index; 
                 //await LoadFoldersAsync();
             }
-            await dialogue.ShowAsync(onClose);
+            dialogue.Show(onClose);
         }
         //private async Task OnDriveChanged(int index)
         //{
@@ -83,7 +83,7 @@ namespace Fastnet.Agents.Client.Pages.Backups
             var r = await backupService.DeleteBackupSourceFolderAsync(Model);
             if (r.Success)
             {
-                await mb.ShowAsync($"Source folder {Model.DisplayName} deleted", (dr) =>
+                mb.Show($"Source folder {Model.DisplayName} deleted", (dr) =>
                 {
                     dialogue.Close(DialogResult.Success());
                 });
@@ -92,8 +92,7 @@ namespace Fastnet.Agents.Client.Pages.Backups
             {
                 // site did not delete
                 var error = r.Errors.Values.First().First();
-                await mb.ShowAsync(
-                    new string[] {
+                mb.Show(new string[] {
                     $"Source folder {Model.DisplayName} could not be deleted",
                     $"{error}" });
             }

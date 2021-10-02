@@ -206,8 +206,8 @@ $black: #000000;
     }
 
     &:hover {
-        color: var(--menu-item-active-foreground-colour);
-        background-color: var(--menu-item-active-background-colour);
+        color: var(--menu-item-hover-foreground-colour);
+        background-color: var(--menu-item-hover-background-colour);
     }
 }
 
